@@ -36,9 +36,9 @@ public class UserPreferencesJsonService {
     }
 
     private String getAccessToken() throws Exception {
-        String tenantId = "e741d71c-c6b6-47b0-803c-0f3b32b07556";
-        String clientId = "b20d9b6e-1b0c-422b-892c-7b0aa65ffa58";
-        String clientSecret = "UTe8Q~uC~v-VYuHozWsOJQUWNOFkPwGTJ3QTjaDw";
+        String tenantId = "";
+        String clientId = "";
+        String clientSecret = "";
         String scope = "api://next-tapm-ui-auth.att.com/.default";
         String grantType = "client_credentials";
         String body = URLEncoder.encode("client_id", "UTF-8") + "=" + URLEncoder.encode(clientId, "UTF-8") + "&" +
