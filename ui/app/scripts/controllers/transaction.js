@@ -239,5 +239,13 @@ glowroot.controller('TransactionCtrl', [
         refreshChildAgentRollups();
       }
     }
+
+    $scope.callNext = function () {
+      $http.get('backend/admin/user-preferences/getFavorites')
+        .then(function (response) {
+          var output = '';
+          return output;
+        });
+    };
   }
 ]);
