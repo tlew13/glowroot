@@ -72,7 +72,7 @@ public class HttpClient {
     }
 
     public void get(String url) throws Exception {
-        postOrGet(url, null, null, configRepository.getHttpProxyConfig(), null);
+        postOrGet(url, null, null, configRepository.getHttpProxyConfig(), null, null);
     }
 
     // optional passwordOverride can be passed in to test HTTP proxy from
@@ -80,16 +80,20 @@ public class HttpClient {
     // org.glowroot.common.repo.util.LazySecretKey.SymmetricEncryptionKeyMissingException
     public String getWithHttpProxyConfigOverride(String url,
             HttpProxyConfig httpProxyConfig, @Nullable String passwordOverride) throws Exception {
-        return postOrGet(url, null, null, httpProxyConfig, passwordOverride);
+        return postOrGet(url, null, null, httpProxyConfig, passwordOverride, null);
     }
 
-    void post(String url, byte[] content, String contentType) throws Exception {
-        postOrGet(url, content, contentType, configRepository.getHttpProxyConfig(), null);
+    public String getWithAuthorizationHeader(String url, String authorizationHeader) throws Exception {
+        return postOrGet(url, null, null, configRepository.getHttpProxyConfig(), null, authorizationHeader);
+    }
+
+    public String post(String url, byte[] content, String contentType) throws Exception {
+        return postOrGet(url, content, contentType, configRepository.getHttpProxyConfig(), null, null);
     }
 
     private String postOrGet(String url, byte /*@Nullable*/ [] content,
             @Nullable String contentType, final HttpProxyConfig httpProxyConfig,
-            final @Nullable String passwordOverride) throws Exception {
+            final @Nullable String passwordOverride, @Nullable String authorizationHeader) throws Exception {
         URI uri = new URI(url);
         String scheme = checkNotNull(uri.getScheme());
         final boolean ssl = scheme.equalsIgnoreCase("https");
@@ -134,6 +138,9 @@ public class HttpClient {
             if (content == null) {
                 request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET,
                         uri.getRawPath());
+                if (authorizationHeader != null){
+                    request.headers().set(HttpHeaderNames.AUTHORIZATION, authorizationHeader);
+                }
             } else {
                 request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST,
                         uri.getRawPath(), Unpooled.wrappedBuffer(content));
