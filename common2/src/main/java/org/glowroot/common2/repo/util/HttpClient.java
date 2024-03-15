@@ -91,6 +91,10 @@ public class HttpClient {
         return postOrGet(url, content, contentType, configRepository.getHttpProxyConfig(), null, null);
     }
 
+    public String postWithAuthorizationHeader(String url, byte[] content, String contentType, String authorizationHeader) throws Exception {
+        return postOrGet(url, content, contentType, configRepository.getHttpProxyConfig(), null, authorizationHeader);
+    }
+
     private String postOrGet(String url, byte /*@Nullable*/ [] content,
             @Nullable String contentType, final HttpProxyConfig httpProxyConfig,
             final @Nullable String passwordOverride, @Nullable String authorizationHeader) throws Exception {
