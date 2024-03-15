@@ -16,6 +16,12 @@
 package org.glowroot.ui;
 
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -24,6 +30,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.base.Ticker;
@@ -170,6 +178,12 @@ public class UiModule {
         jsonServices.add(new InstrumentationConfigJsonService(central, configRepository,
                 liveWeavingService, liveJvmService));
         jsonServices.add(adminJsonService);
+        //load api-plugin JsonServices
+        Path apiPluginConfFile = Paths.get("./ui/api-plugin.conf");
+        if (Files.exists(apiPluginConfFile)){
+            loadApiPluginJsonServices(apiPluginConfFile, central, confDirs, configRepository, httpClient, jsonServices);
+        }
+
 
         if (central) {
             checkNotNull(syntheticResultRepository);
@@ -278,6 +292,21 @@ public class UiModule {
         }
         if (!jvmTermination) {
             reportingExecutor.shutdown();
+        }
+    }
+
+    private static void loadApiPluginJsonServices(Path apiPluginConfFile, boolean central, List<File> confDirs,
+                                                  ConfigRepository configRepository, HttpClient httpClient, List<Object> jsonServices)
+            throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        byte [] apiPluginConfContents = Files.readAllBytes(apiPluginConfFile);
+        ObjectMapper mapper = new ObjectMapper();
+        List<ApiPluginConf> ApiPluginConfList = mapper.readValue(apiPluginConfContents, new TypeReference<List<ApiPluginConf>>() { });
+        for (ApiPluginConf apiPluginConf : ApiPluginConfList) {
+            String pluginClassName = apiPluginConf.getClassName();
+            Class<?> pluginClass = Class.forName(pluginClassName);
+            Constructor<?> constructor = pluginClass.getConstructor(boolean.class, List.class, ConfigRepository.class, HttpClient.class);
+            Object object = constructor.newInstance(new Object[] { central, confDirs, configRepository, httpClient });
+            jsonServices.add(object);
         }
     }
 }
