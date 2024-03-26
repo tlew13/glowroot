@@ -179,11 +179,11 @@ public class UiModule {
                 liveWeavingService, liveJvmService));
         jsonServices.add(adminJsonService);
         //load api-plugin JsonServices
-        Path apiPluginConfFile = Paths.get("./ui/api-plugin.conf");
+        Path uiBase = Paths.get(new File(".").getCanonicalPath(), "ui");
+        Path apiPluginConfFile = Paths.get(uiBase.toString(),"api-plugin.conf");
         if (Files.exists(apiPluginConfFile)){
             loadApiPluginJsonServices(apiPluginConfFile, central, confDirs, configRepository, httpClient, jsonServices);
         }
-
 
         if (central) {
             checkNotNull(syntheticResultRepository);
