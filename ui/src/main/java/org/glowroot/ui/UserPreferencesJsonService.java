@@ -9,10 +9,12 @@ import java.io.File;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Properties;
 
 @JsonService
 public class UserPreferencesJsonService {
 
+    private Properties props;
     private final HttpClient httpClient;
 
     public String accessToken;
@@ -20,7 +22,9 @@ public class UserPreferencesJsonService {
     public long accessTokenExpires;
 
     public UserPreferencesJsonService (boolean central, List<File> confDirs,
-                                       ConfigRepository configRepository, HttpClient httpClient) throws Exception {
+                                       ConfigRepository configRepository,
+                                       HttpClient httpClient, Properties props) throws Exception {
+        this.props = props;
         this.httpClient = httpClient;
         this.accessToken = getAccessToken();
     }
@@ -30,17 +34,16 @@ public class UserPreferencesJsonService {
         if (this.accessTokenExpires < System.currentTimeMillis()){
             this.accessToken = getAccessToken();
         }
-        System.out.println(this.accessTokenExpires);
         String url = "http://localhost:3000/api/external/favorites";
         return this.httpClient.getWithAuthorizationHeader(url, "Bearer " + accessToken);
     }
 
     private String getAccessToken() throws Exception {
-        String tenantId = "";
-        String clientId = "";
-        String clientSecret = "";
-        String scope = "api://next-tapm-ui-auth.att.com/.default";
-        String grantType = "client_credentials";
+        String tenantId = this.props.getProperty("tenantId");
+        String clientId = this.props.getProperty("clientId");
+        String clientSecret = this.props.getProperty("clientSecret");
+        String scope = this.props.getProperty("scope");
+        String grantType = this.props.getProperty("grantType");
         String body = URLEncoder.encode("client_id", "UTF-8") + "=" + URLEncoder.encode(clientId, "UTF-8") + "&" +
                 URLEncoder.encode("client_secret", "UTF-8") + '=' + URLEncoder.encode(clientSecret, "UTF-8") + "&" +
                 URLEncoder.encode("scope", "UTF-8") + "=" + URLEncoder.encode(scope, "UTF-8") + "&" +

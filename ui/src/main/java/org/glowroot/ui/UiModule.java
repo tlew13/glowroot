@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -40,6 +41,7 @@ import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.glowroot.common.util.PropertiesFiles;
 import org.immutables.builder.Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,8 +183,13 @@ public class UiModule {
         //load api-plugin JsonServices
         Path uiBase = Paths.get(new File(".").getCanonicalPath(), "ui");
         Path apiPluginConfFile = Paths.get(uiBase.toString(),"api-plugin.conf");
-        if (Files.exists(apiPluginConfFile)){
-            loadApiPluginJsonServices(apiPluginConfFile, central, confDirs, configRepository, httpClient, jsonServices);
+        Path apiPluginPropertiesFile = Paths.get(uiBase.toString(),"api-plugin.properties");
+        if (Files.exists(apiPluginConfFile)) {
+            Properties props = null;
+            if (Files.exists(apiPluginPropertiesFile)){
+                props = PropertiesFiles.load(apiPluginPropertiesFile.toFile());
+            }
+            loadApiPluginJsonServices(apiPluginConfFile, central, confDirs, configRepository, httpClient, jsonServices, props);
         }
 
         if (central) {
@@ -296,7 +303,8 @@ public class UiModule {
     }
 
     private static void loadApiPluginJsonServices(Path apiPluginConfFile, boolean central, List<File> confDirs,
-                                                  ConfigRepository configRepository, HttpClient httpClient, List<Object> jsonServices)
+                                                  ConfigRepository configRepository, HttpClient httpClient,
+                                                  List<Object> jsonServices, Properties props)
             throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         byte [] apiPluginConfContents = Files.readAllBytes(apiPluginConfFile);
         ObjectMapper mapper = new ObjectMapper();
@@ -304,8 +312,8 @@ public class UiModule {
         for (ApiPluginConf apiPluginConf : ApiPluginConfList) {
             String pluginClassName = apiPluginConf.getClassName();
             Class<?> pluginClass = Class.forName(pluginClassName);
-            Constructor<?> constructor = pluginClass.getConstructor(boolean.class, List.class, ConfigRepository.class, HttpClient.class);
-            Object object = constructor.newInstance(new Object[] { central, confDirs, configRepository, httpClient });
+            Constructor<?> constructor = pluginClass.getConstructor(boolean.class, List.class, ConfigRepository.class, HttpClient.class, Properties.class);
+            Object object = constructor.newInstance(new Object[] { central, confDirs, configRepository, httpClient, props });
             jsonServices.add(object);
         }
     }
