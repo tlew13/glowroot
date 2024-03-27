@@ -142,14 +142,14 @@ public class HttpClient {
             if (content == null) {
                 request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET,
                         uri.getRawPath());
-                if (authorizationHeader != null){
-                    request.headers().set(HttpHeaderNames.AUTHORIZATION, authorizationHeader);
-                }
             } else {
                 request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST,
                         uri.getRawPath(), Unpooled.wrappedBuffer(content));
                 request.headers().set(HttpHeaderNames.CONTENT_TYPE, checkNotNull(contentType));
                 request.headers().set(HttpHeaderNames.CONTENT_LENGTH, content.length);
+            }
+            if (authorizationHeader != null){
+                request.headers().set(HttpHeaderNames.AUTHORIZATION, authorizationHeader);
             }
             request.headers().set(HttpHeaderNames.HOST, host);
             request.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
