@@ -189,7 +189,8 @@ public class UiModule {
             if (Files.exists(apiPluginPropertiesFile)){
                 props = PropertiesFiles.load(apiPluginPropertiesFile.toFile());
             }
-            loadApiPluginJsonServices(apiPluginConfFile, central, confDirs, configRepository, httpClient, jsonServices, props);
+            loadApiPluginJsonServices(apiPluginConfFile, central, confDirs, configRepository,
+                    traceRepository, activeAgentRepository, httpClient, jsonServices, props);
         }
 
         if (central) {
@@ -303,7 +304,8 @@ public class UiModule {
     }
 
     private static void loadApiPluginJsonServices(Path apiPluginConfFile, boolean central, List<File> confDirs,
-                                                  ConfigRepository configRepository, HttpClient httpClient,
+                                                  ConfigRepository configRepository, TraceRepository traceRepository,
+                                                  ActiveAgentRepository activeAgentRepository, HttpClient httpClient,
                                                   List<Object> jsonServices, Properties props)
             throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         byte [] apiPluginConfContents = Files.readAllBytes(apiPluginConfFile);
@@ -312,8 +314,10 @@ public class UiModule {
         for (ApiPluginConf apiPluginConf : ApiPluginConfList) {
             String pluginClassName = apiPluginConf.getClassName();
             Class<?> pluginClass = Class.forName(pluginClassName);
-            Constructor<?> constructor = pluginClass.getConstructor(boolean.class, List.class, ConfigRepository.class, HttpClient.class, Properties.class);
-            Object object = constructor.newInstance(new Object[] { central, confDirs, configRepository, httpClient, props });
+            Constructor<?> constructor = pluginClass.getConstructor(boolean.class, List.class, ConfigRepository.class,
+                    TraceRepository.class, ActiveAgentRepository.class, HttpClient.class, Properties.class);
+            Object object = constructor.newInstance(new Object[] { central, confDirs, configRepository, traceRepository,
+                    activeAgentRepository, httpClient, props });
             jsonServices.add(object);
         }
     }
