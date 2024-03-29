@@ -73,14 +73,16 @@
           </option>
           <option data-divider="true">
           </option>
+          <option disabled>✔ - Live</option><option disabled>✖ - Dead</option>
           <option ng-repeat="item in childAgentRollups track by item.id"
                   data-href="{{agentRollupUrl(item.id)}}"
                   data-tokens="{{item.display}}"
                   value="{{item.id}}"
                   title="{{item.display}}"
                   ng-disabled="item.disabled"
-                  ng-selected="item.id == agentRollup.id">
-            {{item.indentedDisplay}}
+                  ng-selected="item.id == agentRollup.id"
+                  >
+                  {{item.status=='live' ? '✔- ' : '✖- '}}{{item.indentedDisplay}}
           </option>
           <option disabled
                   class="gt-child-agent-rollup-dropdown-message d-none"
@@ -161,6 +163,13 @@
            gt-url="jvm/environment{{agentQueryString()}}"
            gt-active="currentUrl() === 'jvm/environment'"
            ng-if="agentRollup.permissions.jvm.environment && !isAgentRollup()">
+      </div>
+      <div gt-sidebar-item
+           gt-display="Status"
+           gt-url="jvm/status{{agentQueryString()}}"
+           gt-active="currentUrl() === 'jvm/status'"
+           ng-if="!isAgentRollup()"
+           >
       </div>
     </div>
   </div>

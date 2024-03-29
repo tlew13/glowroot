@@ -15,7 +15,6 @@
  */
 
 /* global glowroot */
-
 glowroot.controller('JvmStatusCtrl', [
   '$scope',
   '$http',

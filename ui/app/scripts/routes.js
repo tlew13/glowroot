@@ -124,6 +124,8 @@ glowroot.config([
             return 'jvm/mbean-tree';
           } else if (jvmPermissions.systemProperties) {
             return 'jvm/system-properties';
+          } else if(jvmPermissions.status){
+            return 'jvm/status';
           } else {
             // only remaining option when showNavbarJvm is true
             return 'jvm/environment';
@@ -442,6 +444,11 @@ glowroot.config([
       url: '/environment',
       templateUrl: 'views/jvm/environment.html',
       controller: 'JvmEnvironmentCtrl'
+    });
+    $stateProvider.state('jvm.status', {
+          url: '/status',
+          templateUrl: 'views/jvm/status.html',
+          controller: 'JvmStatusCtrl'
     });
     $stateProvider.state('jvm.capabilities', {
       url: '/capabilities',

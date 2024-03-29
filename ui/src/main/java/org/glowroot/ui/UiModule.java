@@ -141,7 +141,7 @@ public class UiModule {
         }
 
         List<Object> jsonServices = Lists.newArrayList();
-        jsonServices.add(new LayoutJsonService(activeAgentRepository, layoutService));
+        jsonServices.add(new LayoutJsonService(activeAgentRepository, layoutService,  liveJvmService));
         jsonServices.add(new TransactionJsonService(transactionCommonService, traceCommonService,
                 aggregateRepository, configRepository, rollupLevelService, clock));
         jsonServices.add(new TracePointJsonService(traceRepository, liveTraceRepository,

@@ -165,6 +165,23 @@ class JvmJsonService {
         }
         return sb.toString();
     }
+    @GET(path = "/backend/jvm/status", permission = "agent:jvm:status")
+    String getStatus(@BindAgentId String agentId) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        JsonGenerator jg = mapper.getFactory().createGenerator(CharStreams.asWriter(sb));
+        try {
+            jg.writeStartObject();
+            Boolean isActive = false;
+            if (liveJvmService != null) {
+                isActive = liveJvmService.isAvailable(agentId);
+            }
+            jg.writeBooleanField("live", isActive);
+            jg.writeEndObject();
+        }finally {
+            jg.close();
+        }
+        return sb.toString();
+    }
 
     @GET(path = "/backend/jvm/thread-dump", permission = "agent:jvm:threadDump")
     String getThreadDump(@BindAgentId String agentId) throws Exception {
