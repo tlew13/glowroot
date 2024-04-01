@@ -190,7 +190,7 @@ public class UiModule {
                 props = PropertiesFiles.load(apiPluginPropertiesFile.toFile());
             }
             loadApiPluginJsonServices(apiPluginConfFile, central, confDirs, configRepository,
-                    traceRepository, activeAgentRepository, httpClient, jsonServices, props);
+                    traceRepository, liveTraceRepository, activeAgentRepository, httpClient, jsonServices, props);
         }
 
         if (central) {
@@ -305,6 +305,7 @@ public class UiModule {
 
     private static void loadApiPluginJsonServices(Path apiPluginConfFile, boolean central, List<File> confDirs,
                                                   ConfigRepository configRepository, TraceRepository traceRepository,
+                                                  LiveTraceRepository liveTraceRepository,
                                                   ActiveAgentRepository activeAgentRepository, HttpClient httpClient,
                                                   List<Object> jsonServices, Properties props)
             throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
@@ -315,9 +316,9 @@ public class UiModule {
             String pluginClassName = apiPluginConf.getClassName();
             Class<?> pluginClass = Class.forName(pluginClassName);
             Constructor<?> constructor = pluginClass.getConstructor(boolean.class, List.class, ConfigRepository.class,
-                    TraceRepository.class, ActiveAgentRepository.class, HttpClient.class, Properties.class);
+                    TraceRepository.class, LiveTraceRepository.class, ActiveAgentRepository.class, HttpClient.class, Properties.class);
             Object object = constructor.newInstance(new Object[] { central, confDirs, configRepository, traceRepository,
-                    activeAgentRepository, httpClient, props });
+                    liveTraceRepository, activeAgentRepository, httpClient, props });
             jsonServices.add(object);
         }
     }
