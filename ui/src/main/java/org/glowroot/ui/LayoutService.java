@@ -435,6 +435,7 @@ class LayoutService {
     @Value.Immutable
     interface FilteredChildAgentRollup {
         String id();
+        String status();
         String display(); // this is the child display (not including the top level display)
         String lastDisplayPart();
         boolean disabled(); // user has permission to a grandchild rollup, but not to child rollup
