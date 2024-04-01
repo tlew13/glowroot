@@ -57,6 +57,9 @@ public class JvmSidebar {
     public void clickEnvironmentLink() {
         clickWithWait("Environment");
     }
+    public void clickStatusLink() {
+        clickWithWait("Status");
+    }
 
     private void clickWithWait(String linkText) {
         WebElement sidebar = Utils.getWithWait(driver, cssSelector("div.gt-sidebar"));

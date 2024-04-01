@@ -361,8 +361,8 @@ class LayoutService {
                                 "agent:jvm:environment"))
                         .capabilities(authentication.isPermittedForAgentRollup(agentRollupId,
                                 "agent:jvm:capabilities"))
-                        //.status(authentication.isPermittedForAgentRollup(agentRollupId,
-                         //       "agent:jvm:status"))
+                        .status(authentication.isPermittedForAgentRollup(agentRollupId,
+                               "agent:jvm:status"))
                         .build())
                 .syntheticMonitor(authentication.isPermittedForAgentRollup(agentRollupId,
                         "agent:syntheticMonitor"))
@@ -552,11 +552,11 @@ class LayoutService {
         abstract boolean systemProperties();
         abstract boolean environment();
         abstract boolean capabilities();
-        //abstract boolean status();
+        abstract boolean status();
         private boolean hasSomeAccess() {
             // capabilities is not in sidebar, so not included here
             return gauges() || threadDump() || heapDump() || heapHistogram() || forceGC()
-                    || mbeanTree() || systemProperties() || environment();// || status();
+                    || mbeanTree() || systemProperties() || environment() || status();
         }
     }
 

@@ -168,7 +168,7 @@
            gt-display="Status"
            gt-url="jvm/status{{agentQueryString()}}"
            gt-active="currentUrl() === 'jvm/status'"
-           ng-if="!isAgentRollup()"
+           ng-if="agentRollup.permissions.jvm.status && !isAgentRollup()"
            >
       </div>
     </div>

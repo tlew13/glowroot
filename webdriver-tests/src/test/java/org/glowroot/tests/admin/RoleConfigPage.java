@@ -163,11 +163,16 @@ public class RoleConfigPage extends Page {
     public void clickJvmEnvironmentCheckBox() {
         clickPermission("jvm.environment");
     }
+    public void clickJvmStatusCheckBox() {
+        clickPermission("jvm.status");
+    }
 
     public boolean getJvmEnvironmentCheckBoxValue() {
         return getPermission("jvm.environment");
     }
-
+    public boolean getJvmStatusCheckBoxValue() {
+        return getPermission("jvm.status");
+    }
     public void clickConfigViewCheckBox() {
         clickPermission("config.view");
     }

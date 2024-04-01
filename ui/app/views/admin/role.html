@@ -254,6 +254,17 @@
                 Environment
               </div>
             </label>
+            <label class="custom-control custom-checkbox"
+                   ng-class="{'gt-label-disabled': page.permissions.jvm._}"
+                   style="margin-left: 30px;">
+              <input type="checkbox"
+                     class="custom-control-input"
+                     ng-model="page.permissions.jvm.status"
+                     ng-disabled="page.permissions.jvm._ || !layout.adminEdit">
+              <div class="custom-control-label">
+                Status
+              </div>
+            </label>
             <label class="custom-control custom-checkbox">
               <input type="checkbox"
                      class="custom-control-input"
@@ -644,6 +655,17 @@
                      ng-disabled="page.permissions.jvm._ || !layout.adminEdit">
               <div class="custom-control-label">
                 Environment
+              </div>
+            </label>
+            <label class="custom-control custom-checkbox"
+                   ng-class="{'gt-label-disabled': page.permissions.jvm._}"
+                   style="margin-left: 30px;">
+              <input type="checkbox"
+                     class="custom-control-input"
+                     ng-model="page.permissions.jvm.status"
+                     ng-disabled="page.permissions.jvm._ || !layout.adminEdit">
+              <div class="custom-control-label">
+                Status
               </div>
             </label>
             <label class="custom-control custom-checkbox">
@@ -1091,6 +1113,17 @@
                      ng-disabled="permissionBlock.jvm._ || !layout.adminEdit">
               <div class="custom-control-label">
                 Environment
+              </div>
+            </label>
+            <label class="custom-control custom-checkbox"
+                   ng-class="{'gt-label-disabled': permissionBlock.jvm._}"
+                   style="margin-left: 30px;">
+              <input type="checkbox"
+                     class="custom-control-input"
+                     ng-model="permissionBlock.jvm.status"
+                     ng-disabled="permissionBlock.jvm._ || !layout.adminEdit">
+              <div class="custom-control-label">
+                Status
               </div>
             </label>
             <label class="custom-control custom-checkbox">

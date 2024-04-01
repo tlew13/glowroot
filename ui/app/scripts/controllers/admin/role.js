@@ -146,7 +146,9 @@ glowroot.controller('AdminRoleCtrl', [
         permissionBlock.jvm.systemProperties = true;
       } else if (permission === 'agent:jvm:environment') {
         permissionBlock.jvm.environment = true;
-      } else if (permission === 'agent:syntheticMonitor') {
+      } else if (permission === 'agent:jvm:status') {
+        permissionBlock.jvm.status = true;
+      }else if (permission === 'agent:syntheticMonitor') {
         permissionBlock.syntheticMonitor = true;
       } else if (permission === 'agent:incident') {
         permissionBlock.incident = true;
@@ -200,6 +202,7 @@ glowroot.controller('AdminRoleCtrl', [
         permissionsObj.jvm.mbeanTree = false;
         permissionsObj.jvm.systemProperties = false;
         permissionsObj.jvm.environment = false;
+        permissionsObj.jvm.status = false;
       }
       if (permissionsObj.config._) {
         permissionsObj.config.view = false;
@@ -302,6 +305,9 @@ glowroot.controller('AdminRoleCtrl', [
       }
       if (permissionsObj.jvm.environment) {
         permissions.push('agent:jvm:environment');
+      }
+      if (permissionsObj.jvm.status) {
+        permissions.push('agent:jvm:status');
       }
       if (permissionsObj.syntheticMonitor) {
         permissions.push('agent:syntheticMonitor');
@@ -435,7 +441,8 @@ glowroot.controller('AdminRoleCtrl', [
           forceGC: false,
           mbeanTree: false,
           systemProperties: false,
-          environment: false
+          environment: false,
+          status: false
         },
         syntheticMonitor: false,
         incident: false,
