@@ -191,7 +191,7 @@ public class UiModule {
             }
             loadApiPluginJsonServices(apiPluginConfFile, central, confDirs, configRepository,
                     traceRepository, liveTraceRepository, activeAgentRepository, rollupLevelService,
-                    transactionCommonService, httpClient, jsonServices, props);
+                    transactionCommonService, liveJvmService, httpClient, jsonServices, props);
         }
 
         if (central) {
@@ -310,7 +310,7 @@ public class UiModule {
                                                   ActiveAgentRepository activeAgentRepository,
                                                   RollupLevelService rollupLevelService,
                                                   TransactionCommonService transactionCommonService,
-                                                  HttpClient httpClient,
+                                                  LiveJvmService liveJvmService, HttpClient httpClient,
                                                   List<Object> jsonServices, Properties props)
             throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         byte [] apiPluginConfContents = Files.readAllBytes(apiPluginConfFile);
@@ -321,10 +321,10 @@ public class UiModule {
             Class<?> pluginClass = Class.forName(pluginClassName);
             Constructor<?> constructor = pluginClass.getConstructor(boolean.class, List.class, ConfigRepository.class,
                     TraceRepository.class, LiveTraceRepository.class, ActiveAgentRepository.class, RollupLevelService.class,
-                    TransactionCommonService.class, HttpClient.class, Properties.class);
+                    TransactionCommonService.class, LiveJvmService.class, HttpClient.class, Properties.class);
             Object object = constructor.newInstance(new Object[] { central, confDirs, configRepository, traceRepository,
                     liveTraceRepository, activeAgentRepository, rollupLevelService, transactionCommonService,
-                    httpClient, props });
+                    liveJvmService, httpClient, props });
             jsonServices.add(object);
         }
     }
