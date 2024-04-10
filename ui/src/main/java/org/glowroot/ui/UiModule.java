@@ -181,18 +181,21 @@ public class UiModule {
                 liveWeavingService, liveJvmService));
         jsonServices.add(adminJsonService);
         //load api-plugin JsonServices
-        Path confDir = Paths.get(confDirs.get(0).toString());
-        Path apiPluginConfFile = Paths.get(confDir.toString(),"api-plugin.conf");
-        Path apiPluginPropertiesFile = Paths.get(confDir.toString(),"api-plugin.properties");
-        if (Files.exists(apiPluginConfFile)) {
-            Properties props = null;
-            if (Files.exists(apiPluginPropertiesFile)){
-                props = PropertiesFiles.load(apiPluginPropertiesFile.toFile());
+        for (File dir : confDirs){
+            Path apiPluginConfFile = Paths.get(dir.toString(),"api-plugin.conf");
+            if (Files.exists(apiPluginConfFile)){
+                Path apiPluginPropertiesFile = Paths.get(dir.toString(),"api-plugin.properties");
+                Properties props = null;
+                if (Files.exists(apiPluginPropertiesFile)){
+                    props = PropertiesFiles.load(apiPluginPropertiesFile.toFile());
+                }
+                loadApiPluginJsonServices(apiPluginConfFile, central, confDirs, configRepository,
+                        traceRepository, liveTraceRepository, activeAgentRepository, rollupLevelService,
+                        transactionCommonService, liveJvmService, httpClient, jsonServices, props);
+                break;
             }
-            loadApiPluginJsonServices(apiPluginConfFile, central, confDirs, configRepository,
-                    traceRepository, liveTraceRepository, activeAgentRepository, rollupLevelService,
-                    transactionCommonService, liveJvmService, httpClient, jsonServices, props);
         }
+
 
         if (central) {
             checkNotNull(syntheticResultRepository);
