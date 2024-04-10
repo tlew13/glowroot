@@ -181,9 +181,9 @@ public class UiModule {
                 liveWeavingService, liveJvmService));
         jsonServices.add(adminJsonService);
         //load api-plugin JsonServices
-        Path uiBase = Paths.get(new File(".").getCanonicalPath(), "ui");
-        Path apiPluginConfFile = Paths.get(uiBase.toString(),"api-plugin.conf");
-        Path apiPluginPropertiesFile = Paths.get(uiBase.toString(),"api-plugin.properties");
+        Path confDir = Paths.get(confDirs.get(0).toString());
+        Path apiPluginConfFile = Paths.get(confDir.toString(),"api-plugin.conf");
+        Path apiPluginPropertiesFile = Paths.get(confDir.toString(),"api-plugin.properties");
         if (Files.exists(apiPluginConfFile)) {
             Properties props = null;
             if (Files.exists(apiPluginPropertiesFile)){
