@@ -191,7 +191,7 @@ public class UiModule {
                 }
                 loadApiPluginJsonServices(apiPluginConfFile, central, confDirs, configRepository,
                         traceRepository, liveTraceRepository, activeAgentRepository, rollupLevelService,
-                        transactionCommonService, liveJvmService, httpClient, jsonServices, props);
+                        transactionCommonService, liveJvmService, ticker, httpClient, jsonServices, props);
                 break;
             }
         }
@@ -313,7 +313,7 @@ public class UiModule {
                                                   ActiveAgentRepository activeAgentRepository,
                                                   RollupLevelService rollupLevelService,
                                                   TransactionCommonService transactionCommonService,
-                                                  LiveJvmService liveJvmService, HttpClient httpClient,
+                                                  LiveJvmService liveJvmService, @Nullable Ticker ticker, HttpClient httpClient,
                                                   List<Object> jsonServices, Properties props)
             throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         byte [] apiPluginConfContents = Files.readAllBytes(apiPluginConfFile);
@@ -324,10 +324,10 @@ public class UiModule {
             Class<?> pluginClass = Class.forName(pluginClassName);
             Constructor<?> constructor = pluginClass.getConstructor(boolean.class, List.class, ConfigRepository.class,
                     TraceRepository.class, LiveTraceRepository.class, ActiveAgentRepository.class, RollupLevelService.class,
-                    TransactionCommonService.class, LiveJvmService.class, HttpClient.class, Properties.class);
+                    TransactionCommonService.class, LiveJvmService.class, Ticker.class, HttpClient.class, Properties.class);
             Object object = constructor.newInstance(new Object[] { central, confDirs, configRepository, traceRepository,
                     liveTraceRepository, activeAgentRepository, rollupLevelService, transactionCommonService,
-                    liveJvmService, httpClient, props });
+                    liveJvmService, ticker, httpClient, props });
             jsonServices.add(object);
         }
     }
