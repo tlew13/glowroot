@@ -20,7 +20,36 @@ glowroot.controller('NavbarCtrl', [
   '$scope',
   '$location',
   'queryStrings',
+
   function ($scope, $location, queryStrings) {
+    //$scope.clusterinfo = customService.cluster;
+
+    $scope.clusterinfo = [{
+      display: 'TTRACE-12345',
+      indentedDisplay: 'TTRACE-12345',
+      appname: 'TTRACE-12345',
+      clustername: 'PROD',
+      tapmurl: 'http://tapm-prod.web.att.com',
+      agenturl: 'http://tapm-prod-col.idns.cci.att.com:8181',
+      servicetype: 'other'
+    },
+    {
+      display: 'TTRACE-INJECTOR',
+      indentedDisplay: 'TTRACE-INJECTOR',
+      appname: 'TTRACE-INJECTOR',
+      clustername: 'PROD',
+      tapmurl: 'http://tapm-prod.web.att.com',
+      agenturl: 'http://tapm-prod-col.idns.cci.att.com:8181',
+      servicetype: 'other'
+    }];
+
+    $scope.cluster = {};
+    
+    $scope.appname = 'None';
+
+    $scope.test = {indentedDisplay: 'TESTING FOR REAL', display: 'TESTING FOR REAL'};
+
+    $scope.selectedCluster = [];
 
     $scope.queryString = function (preserveAgentRollup, preserveTransactionType, addDefaultGaugeNames) {
       var query = {};
@@ -117,6 +146,6 @@ glowroot.controller('NavbarCtrl', [
       } else {
         return 'Profile';
       }
-    };
+    };    
   }
 ]);

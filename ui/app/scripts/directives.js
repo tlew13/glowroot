@@ -632,3 +632,91 @@ glowroot.directive('gtThreadStats', function () {
     templateUrl: 'template/gt-thread-stats.html'
   };
 });
+
+glowroot.directive('navSelectpicker', function () {
+  return {
+    restrict: 'E',
+    template: '<div class="nav-item">'
+     + '<select gt-selectpicker gt-title="\'Select Applications...\'" data-width="fit" data-live-search="true" data-style="nav-link" id="clusterInfoDropdown" aria-label="Cluster Info">'
+     + '<option>TTRACE-12345</option>'
+     + '<option>TTRACEINJECT-23456</option>'
+     + '<option>Blah-Blah</option>'
+     + '</select>'
+     + '</div>'
+  };
+});
+
+glowroot.directive('navMultiselect', [
+  function () {
+    return {
+      scope: {
+        gtNoneSelectedText: '@'
+      },
+      link: function (scope, iElement) {
+
+        function initializeMultiselect() {
+          iElement.multiselect({
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Filter',
+            nonSelectedText: scope.gtNoneSelectedText,
+            maxHeight: 400,
+            numberDisplayed: 3,
+            includeSelectAllOption: true,
+            includeFilterClearBtn: true,
+            // mostly for bootstrap 4 compatibility,
+            // and mostly copied from https://github.com/davidstutz/bootstrap-multiselect/pull/1050
+            buttonClass: 'btn',
+            buttonContainer: '<div class="dropdown nav-item" />',
+            templates: {
+              button: '<button type="button" class="multiselect dropdown-toggle nav-link" style="font-size: 1rem; padding-right: 1.5rem !important; font-weight: 600;" data-toggle="dropdown" data-flip="false">'
+                  + '<span class="multiselect-selected-text"></span>'
+                  + ' <b class="caret"></b>'
+                  + '</button>',
+              ul: '<ul class="multiselect-container dropdown-menu p-1 m-0"></ul>',
+              filter: '<li class="multiselect-item multiselect-filter">'
+                  + '<input class="form-control multiselect-search" type="text" />'
+                  + '</li>',
+              filterClearBtn: '',
+              li: '<li>'
+                  + '<a tabIndex="0" class="dropdown-item" style="padding: 2px 0;">'
+                  + '<label class="custom-control custom-checkbox" style="padding-left: 36px;">'
+                  + '<div class="custom-control-label"></div>'
+                  + '</label>'
+                  + '</a>'
+                  + '</li>',
+            },
+            optionLabel: function (element) {
+              return $(element).data('val').indentedDisplay;
+            },
+            optionFullText: function (element) {
+              return $(element).data('val').display;
+            },
+            onDropdownShown: function () {
+              iElement.parent().find('.multiselect-search').focus();
+            },
+            onDropdownHidden: function () {
+              iElement.removeClass('ng-untouched');
+              iElement.addClass('ng-touched');
+            }
+          });
+        }
+
+        initializeMultiselect();
+
+        // watch for changes in the items
+        scope.$watch('items', function (newVal, oldVal) {
+          if (newVal !== oldVal) {
+            // if the items have changed, reinitialize the multiselect
+            iElement.multiselect('destroy');
+            initializeMultiselect();
+          }
+        });
+        
+        scope.$on('$destroy', function () {
+          iElement.multiselect('destroy');
+        });
+      }
+    };
+  }
+]);
