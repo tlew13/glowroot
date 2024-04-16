@@ -669,8 +669,8 @@ glowroot.directive('navMultiselect', [
             buttonClass: 'btn',
             buttonContainer: '<div class="dropdown nav-item" />',
             templates: {
-              button: '<button type="button" class="multiselect dropdown-toggle nav-link" style="font-size: 1rem; padding-right: 1.5rem !important; font-weight: 600;" data-toggle="dropdown" data-flip="false">'
-                  + '<span class="multiselect-selected-text"></span>'
+              button: '<button type="button" class="multiselect dropdown-toggle nav-link" style="padding-right: 1.5rem !important; font-weight: 600;" data-toggle="dropdown" data-flip="false">'
+                  + '<span class="multiselect-selected-text font-size: 1rem !important; "></span>'
                   + ' <b class="caret"></b>'
                   + '</button>',
               ul: '<ul class="multiselect-container dropdown-menu p-1 m-0"></ul>',
@@ -712,7 +712,7 @@ glowroot.directive('navMultiselect', [
             initializeMultiselect();
           }
         });
-        
+
         scope.$on('$destroy', function () {
           iElement.multiselect('destroy');
         });

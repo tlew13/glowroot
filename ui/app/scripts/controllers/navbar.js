@@ -19,10 +19,9 @@
 glowroot.controller('NavbarCtrl', [
   '$scope',
   '$location',
+  '$timeout',
   'queryStrings',
-
-  function ($scope, $location, queryStrings) {
-    //$scope.clusterinfo = customService.cluster;
+  function ($scope, $location, $timeout, queryStrings) {
 
     $scope.clusterinfo = [{
       display: 'TTRACE-12345',
@@ -43,13 +42,21 @@ glowroot.controller('NavbarCtrl', [
       servicetype: 'other'
     }];
 
-    $scope.cluster = {};
-    
-    $scope.appname = 'None';
-
-    $scope.test = {indentedDisplay: 'TESTING FOR REAL', display: 'TESTING FOR REAL'};
-
     $scope.selectedCluster = [];
+
+    $scope.$watch('page', function() {
+        $timeout(function () {
+            var $ClusterIdSelect = $('#ClusterIdSelect');
+            $ClusterIdSelect.multiselect('rebuild');
+            if (!$scope.clusterinfo.length) {
+                var $button = $('button.multiselect');
+                $button.prop('disabled', true);
+                $button.find('.multiselect-selected-text').text('No Applications');
+            }
+        });
+    });
+
+
 
     $scope.queryString = function (preserveAgentRollup, preserveTransactionType, addDefaultGaugeNames) {
       var query = {};

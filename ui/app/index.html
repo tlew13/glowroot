@@ -116,31 +116,7 @@
                       ng-value="cluster.appname" data-val="{{cluster}}">
                 {{cluster.indentedDisplay}}
               </option>
-              <option ng-value="test.display" data-val="{{test}}">{{test.indentedDisplay}}</option>
-              <option ng-value="Test2" data-val="Testing2">TESTING2</option>
             </select>
-          </div>
-          <div>
-            <select gt-multiselect 
-              multiple 
-              ng-model="selectedCluster" 
-              required 
-              class="d-none"
-              style="min-width: 350px; max-width: 650px;" 
-              gt-none-selected-text="Applications"
-              id="ClusterIdSelect">
-              <option ng-repeat="agent in clusterinfo track by agent.appname"
-                      ng-value="agent.appname" data-val="{{agent}}">
-                {{agent.indentedDisplay}}
-              </option>
-              <option ng-value="test.display" data-val="{{test}}">{{test.indentedDisplay}}</option>
-            </select>
-          </div>
-          <div gt-navbar-item
-               gt-display="{{clusterinfo[0].display}}"
-               gt-item-name="transaction"
-               gt-click="collapseIfNeeded()"
-               ng-if="layout.showNavbarTransaction">
           </div>
           <div gt-navbar-item
                gt-display="Transactions"
