@@ -16,14 +16,23 @@
 package org.glowroot.ui;
 
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.base.Ticker;
@@ -32,6 +41,7 @@ import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.glowroot.common.util.PropertiesFiles;
 import org.immutables.builder.Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -170,6 +180,22 @@ public class UiModule {
         jsonServices.add(new InstrumentationConfigJsonService(central, configRepository,
                 liveWeavingService, liveJvmService));
         jsonServices.add(adminJsonService);
+        //load api-plugin JsonServices
+        for (File dir : confDirs){
+            Path apiPluginConfFile = Paths.get(dir.toString(),"api-plugin.conf");
+            if (Files.exists(apiPluginConfFile)){
+                Path apiPluginPropertiesFile = Paths.get(dir.toString(),"api-plugin.properties");
+                Properties props = null;
+                if (Files.exists(apiPluginPropertiesFile)){
+                    props = PropertiesFiles.load(apiPluginPropertiesFile.toFile());
+                }
+                loadApiPluginJsonServices(apiPluginConfFile, central, confDirs, configRepository,
+                        traceRepository, liveTraceRepository, activeAgentRepository, rollupLevelService,
+                        transactionCommonService, liveJvmService, ticker, httpClient, jsonServices, props);
+                break;
+            }
+        }
+
 
         if (central) {
             checkNotNull(syntheticResultRepository);
@@ -278,6 +304,31 @@ public class UiModule {
         }
         if (!jvmTermination) {
             reportingExecutor.shutdown();
+        }
+    }
+
+    private static void loadApiPluginJsonServices(Path apiPluginConfFile, boolean central, List<File> confDirs,
+                                                  ConfigRepository configRepository, TraceRepository traceRepository,
+                                                  LiveTraceRepository liveTraceRepository,
+                                                  ActiveAgentRepository activeAgentRepository,
+                                                  RollupLevelService rollupLevelService,
+                                                  TransactionCommonService transactionCommonService,
+                                                  LiveJvmService liveJvmService, @Nullable Ticker ticker, HttpClient httpClient,
+                                                  List<Object> jsonServices, Properties props)
+            throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        byte [] apiPluginConfContents = Files.readAllBytes(apiPluginConfFile);
+        ObjectMapper mapper = new ObjectMapper();
+        List<ApiPluginConf> ApiPluginConfList = mapper.readValue(apiPluginConfContents, new TypeReference<List<ApiPluginConf>>() { });
+        for (ApiPluginConf apiPluginConf : ApiPluginConfList) {
+            String pluginClassName = apiPluginConf.getClassName();
+            Class<?> pluginClass = Class.forName(pluginClassName);
+            Constructor<?> constructor = pluginClass.getConstructor(boolean.class, List.class, ConfigRepository.class,
+                    TraceRepository.class, LiveTraceRepository.class, ActiveAgentRepository.class, RollupLevelService.class,
+                    TransactionCommonService.class, LiveJvmService.class, Ticker.class, HttpClient.class, Properties.class);
+            Object object = constructor.newInstance(new Object[] { central, confDirs, configRepository, traceRepository,
+                    liveTraceRepository, activeAgentRepository, rollupLevelService, transactionCommonService,
+                    liveJvmService, ticker, httpClient, props });
+            jsonServices.add(object);
         }
     }
 }
