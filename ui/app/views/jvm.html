@@ -73,14 +73,16 @@
           </option>
           <option data-divider="true">
           </option>
+          <option disabled>✔ - Live</option><option disabled>✖ - Dead</option>
           <option ng-repeat="item in childAgentRollups track by item.id"
                   data-href="{{agentRollupUrl(item.id)}}"
                   data-tokens="{{item.display}}"
                   value="{{item.id}}"
                   title="{{item.display}}"
                   ng-disabled="item.disabled"
-                  ng-selected="item.id == agentRollup.id">
-            {{item.indentedDisplay}}
+                  ng-selected="item.id == agentRollup.id"
+                  >
+                  {{item.status=='live' ? '✔- ' : '✖- '}}{{item.indentedDisplay}}
           </option>
           <option disabled
                   class="gt-child-agent-rollup-dropdown-message d-none"

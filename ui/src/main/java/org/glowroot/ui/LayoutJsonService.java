@@ -30,6 +30,7 @@ import org.glowroot.ui.HttpSessionManager.Authentication;
 import org.glowroot.ui.LayoutService.AgentRollupLayout;
 import org.glowroot.ui.LayoutService.FilteredChildAgentRollup;
 import org.glowroot.ui.LayoutService.FilteredTopLevelAgentRollup;
+import org.glowroot.common.live.LiveJvmService;
 
 class LayoutJsonService {
 
@@ -37,10 +38,12 @@ class LayoutJsonService {
 
     private final ActiveAgentRepository activeAgentRepository;
     private final LayoutService layoutService;
+    private final LiveJvmService liveJvmService;
 
-    LayoutJsonService(ActiveAgentRepository activeAgentRepository, LayoutService layoutService) {
+    LayoutJsonService(ActiveAgentRepository activeAgentRepository, LayoutService layoutService, LiveJvmService liveJvmService) {
         this.activeAgentRepository = activeAgentRepository;
         this.layoutService = layoutService;
+        this.liveJvmService = liveJvmService;
     }
 
     @GET(path = "/backend/top-level-agent-rollups", permission = "")
@@ -95,15 +98,17 @@ class LayoutJsonService {
     }
 
     // need to filter out agent child rollups with no access rights
-    private static List<FilteredChildAgentRollup> filterChildAgentRollups(
+    private List<FilteredChildAgentRollup> filterChildAgentRollups(
             List<AgentRollup> agentRollups, Authentication authentication) throws Exception {
         List<FilteredChildAgentRollup> filtered = Lists.newArrayList();
         for (AgentRollup agentRollup : agentRollups) {
             HasAnyPermission hasAnyPermission =
                     authentication.hasAnyPermissionForAgentRollup(agentRollup.id());
+            String status = getJvmStatus(agentRollup.id())? "live" : "dead";
             if (hasAnyPermission != HasAnyPermission.NO) {
                 filtered.add(ImmutableFilteredChildAgentRollup.builder()
                         .id(agentRollup.id())
+                        .status(status)
                         .display(agentRollup.display())
                         .lastDisplayPart(agentRollup.lastDisplayPart())
                         .disabled(hasAnyPermission == HasAnyPermission.ONLY_IN_CHILD)
@@ -114,11 +119,15 @@ class LayoutJsonService {
         }
         return filtered;
     }
+    private boolean getJvmStatus(String id) throws Exception {
+        return liveJvmService.isAvailable(id);
+    }
 
     private static void flatten(FilteredChildAgentRollup filteredChildAgentRollup, int depth,
             List<AgentRollupSmall> dropdown) throws Exception {
         AgentRollupSmall agentRollupLayout = ImmutableAgentRollupSmall.builder()
                 .id(filteredChildAgentRollup.id())
+                .status(filteredChildAgentRollup.status())
                 .display(filteredChildAgentRollup.display())
                 .lastDisplayPart(filteredChildAgentRollup.lastDisplayPart())
                 .disabled(filteredChildAgentRollup.disabled())
@@ -138,6 +147,7 @@ class LayoutJsonService {
         String lastDisplayPart();
         boolean disabled();
         int depth();
+        String status();
     }
 
     @Value.Immutable
