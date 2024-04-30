@@ -16,12 +16,14 @@
 
 /* global glowroot, moment, $ */
 
+// ATT CUSTOM CODE -- inject addFavoriteService into controller
 glowroot.controller('TransactionThroughputCtrl', [
   '$scope',
   '$location',
   '$filter',
   'charts',
-  function ($scope, $location, $filter, charts) {
+  'addFavoriteService',
+  function ($scope, $location, $filter, charts, addFavoriteService) {
 
     $scope.$parent.activeTabItem = 'time';
 
@@ -57,6 +59,30 @@ glowroot.controller('TransactionThroughputCtrl', [
       }
       return true;
     };
+
+    // ATT CUSTOM CODE BEGIN
+    $scope.addFavorite = function () {
+      var favoriteItem = null;
+      if ($scope.agentId){
+          var jvmItem = $scope.childAgentRollups.find(function(item) {
+              return item.id === $scope.agentId;
+          });
+          var jvmName = jvmItem.display;
+          favoriteItem = $scope.topLevelAgentRollups.find(function(item) {
+              return item.id + jvmName === $scope.agentId;
+          });
+      }else {
+          favoriteItem = $scope.topLevelAgentRollups.find(function(item) {
+              return item.id === $scope.agentRollupId;
+          });
+      }
+      if (favoriteItem){
+          addFavoriteService.postData(favoriteItem.display, 'Service');
+      }else{
+          addFavoriteService.postData(null, 'Service');
+      }
+    };
+    // ATT CUSTOM CODE END
 
     function onRefreshData(data) {
       $scope.transactionCount = data.transactionCount;

@@ -14,6 +14,9 @@
   limitations under the License.
 -->
 <div ng-include src="'template/gt-http-error-overlay.html'"></div>
+<!-- ATT CUSTOM CODE BEGIN -->
+<popup-dialog popupService="popupService"></popup-dialog>
+<!-- ATT CUSTOM CODE END -->
 <div class="gt-response-time-radios"
      role="group"
      aria-label="View">
@@ -57,6 +60,14 @@
   </div>
 </div>
 <div class="gt-chart-controls float-right">
+  <!-- ATT CUSTOM CODE BEGIN -->
+  <button class="gt-chart-button"
+          ng-click="addFavorite()">
+    <span title="Add Favorite"
+          class="fas fa-heart">
+    </span>
+  </button>
+  <!-- ATT CUSTOM CODE END -->
   <button class="gt-chart-button"
           ng-click="zoomOut()">
     <span title="Zoom out"

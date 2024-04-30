@@ -16,6 +16,7 @@
 
 /* global glowroot, angular, moment, $ */
 
+// ATT CUSTOM CODE -- inject addFavoriteService into controller
 glowroot.controller('TracesCtrl', [
   '$scope',
   '$location',
@@ -27,7 +28,8 @@ glowroot.controller('TracesCtrl', [
   'traceModal',
   'queryStrings',
   'traceKind',
-  function ($scope, $location, $http, $q, locationChanges, charts, httpErrors, traceModal, queryStrings, traceKind) {
+  'addFavoriteService',
+  function ($scope, $location, $http, $q, locationChanges, charts, httpErrors, traceModal, queryStrings, traceKind, addFavoriteService) {
 
     $scope.$parent.activeTabItem = 'traces';
 
@@ -471,6 +473,30 @@ glowroot.controller('TracesCtrl', [
         $scope.filter.durationMillisLow = 0;
       }
     });
+
+    // ATT CUSTOM CODE BEGIN
+    $scope.addFavorite = function () {
+      var favoriteItem = null;
+      if ($scope.agentId){
+          var jvmItem = $scope.childAgentRollups.find(function(item) {
+              return item.id === $scope.agentId;
+          });
+          var jvmName = jvmItem.display;
+          favoriteItem = $scope.topLevelAgentRollups.find(function(item) {
+              return item.id + jvmName === $scope.agentId;
+          });
+      }else {
+          favoriteItem = $scope.topLevelAgentRollups.find(function(item) {
+              return item.id === $scope.agentRollupId;
+          });
+      }
+      if (favoriteItem){
+          addFavoriteService.postData(favoriteItem.display, 'Service');
+      }else{
+          addFavoriteService.postData(null, 'Service');
+      }
+    };
+    // ATT CUSTOM CODE END
 
     function updateLocation() {
       var query = $scope.buildQueryObjectForTraceTab();

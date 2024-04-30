@@ -14,8 +14,19 @@
   limitations under the License.
 -->
 <div ng-include src="'template/gt-http-error-overlay.html'"></div>
+<!-- ATT CUSTOM CODE BEGIN -->
+<popup-dialog popupService="popupService"></popup-dialog>
+<!-- ATT CUSTOM CODE END -->
 <div style="height: 30px;"></div>
 <div class="gt-chart-controls float-right">
+  <!-- ATT CUSTOM CODE BEGIN -->
+  <button class="gt-chart-button"
+          ng-click="addFavorite()">
+        <span title="Add Favorite"
+              class="fas fa-heart">
+        </span>
+  </button>
+  <!-- ATT CUSTOM CODE END -->
   <button class="gt-chart-button"
           ng-click="zoomOut()">
         <span title="Zoom out"

@@ -16,11 +16,13 @@
 
 /* global glowroot, angular, $ */
 
+// ATT CUSTOM CODE -- inject addFavoriteService into controller
 glowroot.controller('TransactionAverageCtrl', [
   '$scope',
   '$location',
   'charts',
-  function ($scope, $location, charts) {
+  'addFavoriteService',
+  function ($scope, $location, charts, addFavoriteService) {
 
     $scope.$parent.activeTabItem = 'time';
 
@@ -61,6 +63,30 @@ glowroot.controller('TransactionAverageCtrl', [
           && (threadStats.totalCpuNanos !== -1 || threadStats.totalBlockedNanos !== -1
               || threadStats.totalWaitedNanos !== -1 || threadStats.totalAllocatedBytes !== -1);
     };
+
+    // ATT CUSTOM CODE BEGIN
+    $scope.addFavorite = function () {
+      var favoriteItem = null;
+      if ($scope.agentId){
+          var jvmItem = $scope.childAgentRollups.find(function(item) {
+              return item.id === $scope.agentId;
+          });
+          var jvmName = jvmItem.display;
+          favoriteItem = $scope.topLevelAgentRollups.find(function(item) {
+              return item.id + jvmName === $scope.agentId;
+          });
+      }else {
+          favoriteItem = $scope.topLevelAgentRollups.find(function(item) {
+              return item.id === $scope.agentRollupId;
+          });
+      }
+      if (favoriteItem){
+          addFavoriteService.postData(favoriteItem.display, 'Service');
+      }else{
+          addFavoriteService.postData(null, 'Service');
+      }
+    };
+    // ATT CUSTOM CODE END
 
     function onRefreshData(data) {
       var mainThreadRootTimers = data.mergedAggregate.mainThreadRootTimers;

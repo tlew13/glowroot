@@ -15,6 +15,9 @@
 -->
 <div style="position: relative;">
   <div ng-include src="'template/gt-http-error-overlay.html'"></div>
+  <!-- ATT CUSTOM CODE BEGIN -->
+  <popup-dialog popupService="popupService"></popup-dialog>
+  <!-- ATT CUSTOM CODE END -->
   <div ng-form
        gt-form-with-primary-button
        style="margin-left: 42px; margin-bottom: 10px;">
@@ -45,6 +48,14 @@
   <!-- z-index 800 is needed to keep the buttons in front of the chart spinner overlay -->
   <div class="clearfix" style="position: relative; z-index: 800;">
     <div class="gt-error-messages-chart-tools float-right" style="margin-bottom: -8px; font-size: 20px;">
+      <!-- ATT CUSTOM CODE BEGIN -->
+      <button class="gt-chart-button"
+              ng-click="addFavorite()">
+        <span title="Add Favorite"
+              class="fas fa-heart">
+        </span>
+      </button>
+      <!-- ATT CUSTOM CODE END -->
       <button class="gt-chart-button"
               ng-click="zoomOut()">
         <span title="Zoom out"
