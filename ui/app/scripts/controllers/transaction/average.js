@@ -16,11 +16,15 @@
 
 /* global glowroot, angular, $ */
 
+// ATT CUSTOM CODE -- inject addFavoriteService and addScreenshot into controller
+// Also import html2canvas for screenshot functionality
+//import html2canvas from 'html2canvas';
 glowroot.controller('TransactionAverageCtrl', [
   '$scope',
   '$location',
   'charts',
-  function ($scope, $location, charts) {
+  'html2canvas',
+  function ($scope, $location, charts, html2canvas) {
 
     $scope.$parent.activeTabItem = 'time';
 
@@ -61,6 +65,38 @@ glowroot.controller('TransactionAverageCtrl', [
           && (threadStats.totalCpuNanos !== -1 || threadStats.totalBlockedNanos !== -1
               || threadStats.totalWaitedNanos !== -1 || threadStats.totalAllocatedBytes !== -1);
     };
+
+    // ATT CUSTOM CODE BEGIN
+    $scope.addScreenshot = function(imageName) {
+    // Use document.body as the element to capture the entire page
+          var element = document.body;
+          html2canvas.capture(element, {
+            // Options to potentially improve the output quality
+            scale: 1, // Adjust the scale to manage quality vs performance
+            useCORS: true, // Attempt to load cross-origin images
+            logging: true, // Enable for debugging purposes
+            width: element.scrollWidth, // Capture the full width
+            height: element.scrollHeight, // Capture the full height
+          }).then(function(canvas) {
+              // Convert the canvas to a data URL
+              var imageURL = canvas.toDataURL('image/png');
+
+              // Create a temporary link to initiate the download
+              var downloadLink = document.createElement('a');
+              downloadLink.href = imageURL;
+              downloadLink.download = imageName || 'fullpage_screenshot.png';
+
+              // Append the link to the document, trigger the click, and then remove it
+              document.body.appendChild(downloadLink);
+              downloadLink.click();
+              document.body.removeChild(downloadLink);
+          }, function(error) {
+              //console.error('Error capturing the page:', error);
+          });
+        };
+
+    // ATT CUSTOM CODE END
+
 
     function onRefreshData(data) {
       var mainThreadRootTimers = data.mergedAggregate.mainThreadRootTimers;
