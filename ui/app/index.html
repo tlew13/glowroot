@@ -64,6 +64,12 @@
           {weight: '400'}).load();
     }
   </script>
+
+  <!-- ATT CUSTOM CODE BEGIN -->
+  <!-- This imports html2canvas library - used for screenshots -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- ATT CUSTOM CODE END -->
+
 </head>
 <body ng-app="glowroot"
       ng-class="{'footer-tall': layout.central && isViewingAgent()}"
@@ -314,7 +320,6 @@
 <script src="scripts/services/conversions.js"></script>
 <script src="scripts/services/instrumentation-export.js"></script>
 <!-- ATT CUSTOM CODE BEGIN -->
-<script src="../node_modules/html2canvas/dist/html2canvas.min.js"></script> <!-- referencing from node_modules might not be best practice? -->
 <script src="scripts/services/custom-services.js"></script>
 <!-- ATT CUSTOM CODE END -->
 <script src="scripts/controllers/navbar.js"></script>
