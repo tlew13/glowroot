@@ -16,6 +16,7 @@
 
 /* global glowroot, moment, gtParseIncludesExcludes, $ */
 
+// ATT CUSTOM CODE -- inject addFavoriteService into controller
 glowroot.controller('ErrorMessagesCtrl', [
   '$scope',
   '$http',
@@ -24,7 +25,8 @@ glowroot.controller('ErrorMessagesCtrl', [
   'charts',
   'queryStrings',
   'httpErrors',
-  function ($scope, $http, $location, locationChanges, charts, queryStrings, httpErrors) {
+  'addFavoriteService',
+  function ($scope, $http, $location, locationChanges, charts, queryStrings, httpErrors, addFavoriteService) {
 
     $scope.$parent.activeTabItem = 'messages';
 
@@ -140,6 +142,30 @@ glowroot.controller('ErrorMessagesCtrl', [
       appliedFilter = $scope.filter;
       $scope.range.chartRefresh++;
     };
+
+    //   ATT CUSTOM CODE BEGIN
+    $scope.addFavorite = function () {
+      var favoriteItem = null;
+      if ($scope.agentId){
+          var jvmItem = $scope.childAgentRollups.find(function(item) {
+              return item.id === $scope.agentId;
+          });
+          var jvmName = jvmItem.display;
+          favoriteItem = $scope.topLevelAgentRollups.find(function(item) {
+              return item.id + jvmName === $scope.agentId;
+          });
+      }else {
+          favoriteItem = $scope.topLevelAgentRollups.find(function(item) {
+              return item.id === $scope.agentRollupId;
+          });
+      }
+      if (favoriteItem){
+          addFavoriteService.postData(favoriteItem.display, 'Service');
+      }else{
+          addFavoriteService.postData(null, 'Service');
+      }
+    };
+    //   ATT CUSTOM CODE END
 
     locationChanges.on($scope, function () {
       var priorAppliedFilter = appliedFilter;

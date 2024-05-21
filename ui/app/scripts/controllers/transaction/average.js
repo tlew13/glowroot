@@ -24,7 +24,8 @@ glowroot.controller('TransactionAverageCtrl', [
   '$location',
   'charts',
   'html2canvas',
-  function ($scope, $location, charts, html2canvas) {
+  'addFavoriteService',
+  function ($scope, $location, charts, html2canvas, addFavoriteService) {
 
     $scope.$parent.activeTabItem = 'time';
 
@@ -96,8 +97,28 @@ glowroot.controller('TransactionAverageCtrl', [
       });
     };
 
+    $scope.addFavorite = function () {
+      var favoriteItem = null;
+      if ($scope.agentId){
+          var jvmItem = $scope.childAgentRollups.find(function(item) {
+              return item.id === $scope.agentId;
+          });
+          var jvmName = jvmItem.display;
+          favoriteItem = $scope.topLevelAgentRollups.find(function(item) {
+              return item.id + jvmName === $scope.agentId;
+          });
+      }else {
+          favoriteItem = $scope.topLevelAgentRollups.find(function(item) {
+              return item.id === $scope.agentRollupId;
+          });
+      }
+      if (favoriteItem){
+          addFavoriteService.postData(favoriteItem.display, 'Service');
+      }else{
+          addFavoriteService.postData(null, 'Service');
+      }
+    };
     // ATT CUSTOM CODE END
-
 
     function onRefreshData(data) {
       var mainThreadRootTimers = data.mergedAggregate.mainThreadRootTimers;

@@ -40,7 +40,6 @@ public class RegionRollupJsonService {
     private static final JsonFactory jsonFactory = new JsonFactory();
     private final @Nullable Ticker ticker;
 
-
     public RegionRollupJsonService (boolean central, List<File> confDirs,
                                         ConfigRepository configRepository, TraceRepository traceRepository,
                                         LiveTraceRepository liveTraceRepository,

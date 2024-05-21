@@ -54,6 +54,7 @@ public class AggregateMetricsJsonService {
         this.transactionCommonService = transactionCommonService;
         this.liveJvmService = liveJvmService;
     }
+
     @GET(path = "/backend/error/aggregate-trace-count", permission = "admin:view:aggregateErrorCount")
     String getAggregateErrorCount(@BindRequest AggregateMetricsDataRequest request) throws Exception {
         List<ActiveAgentRepository.TopLevelAgentRollup> topLevelAgents = activeAgentRepository.readActiveTopLevelAgentRollups(request.from(), request.to());

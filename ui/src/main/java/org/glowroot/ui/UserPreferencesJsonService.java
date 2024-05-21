@@ -22,8 +22,10 @@ import java.util.Properties;
 
 @JsonService
 public class UserPreferencesJsonService {
+
     private Properties props;
     private final HttpClient httpClient;
+
     public String accessToken;
 
     public long accessTokenExpires;

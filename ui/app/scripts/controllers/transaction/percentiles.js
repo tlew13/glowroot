@@ -16,6 +16,7 @@
 
 /* global glowroot, angular, $ */
 
+// ATT CUSTOM CODE -- inject addFavoriteService into controller
 glowroot.controller('TransactionPercentilesCtrl', [
   '$scope',
   '$location',
@@ -24,7 +25,8 @@ glowroot.controller('TransactionPercentilesCtrl', [
   'locationChanges',
   'charts',
   'modals',
-  function ($scope, $location, $filter, $timeout, locationChanges, charts, modals) {
+  'addFavoriteService',
+  function ($scope, $location, $filter, $timeout, locationChanges, charts, modals, addFavoriteService) {
 
     $scope.$parent.activeTabItem = 'time';
 
@@ -88,6 +90,30 @@ glowroot.controller('TransactionPercentilesCtrl', [
       $('#customPercentilesModal').modal('hide');
       $scope.range.chartRefresh++;
     };
+
+    // ATT CUSTOM CODE BEGIN
+    $scope.addFavorite = function () {
+      var favoriteItem = null;
+      if ($scope.agentId){
+          var jvmItem = $scope.childAgentRollups.find(function(item) {
+              return item.id === $scope.agentId;
+          });
+          var jvmName = jvmItem.display;
+          favoriteItem = $scope.topLevelAgentRollups.find(function(item) {
+              return item.id + jvmName === $scope.agentId;
+          });
+      }else {
+          favoriteItem = $scope.topLevelAgentRollups.find(function(item) {
+              return item.id === $scope.agentRollupId;
+          });
+      }
+      if (favoriteItem){
+          addFavoriteService.postData(favoriteItem.display, 'Service');
+      }else{
+          addFavoriteService.postData(null, 'Service');
+      }
+    };
+    // ATT CUSTOM CODE END
 
     locationChanges.on($scope, function () {
       var priorAppliedPercentiles = appliedPercentiles;
