@@ -67,33 +67,34 @@ glowroot.controller('TransactionAverageCtrl', [
     };
 
     // ATT CUSTOM CODE BEGIN
-    $scope.addScreenshot = function(imageName) {
-    // Use document.body as the element to capture the entire page
-          var element = document.body;
-          html2canvas.capture(element, {
-            // Options to potentially improve the output quality
-            scale: 1, // Adjust the scale to manage quality vs performance
-            useCORS: true, // Attempt to load cross-origin images
-            logging: true, // Enable for debugging purposes
-            width: element.scrollWidth, // Capture the full width
-            height: element.scrollHeight, // Capture the full height
-          }).then(function(canvas) {
-              // Convert the canvas to a data URL
-              var imageURL = canvas.toDataURL('image/png');
 
-              // Create a temporary link to initiate the download
-              var downloadLink = document.createElement('a');
-              downloadLink.href = imageURL;
-              downloadLink.download = imageName || 'fullpage_screenshot.png';
+    $scope.addScreenshot = function (imageName) {
+      // Use document.body as the element to capture the entire page
+      var element = document.body;
+      html2canvas.capture(element, {
+        // Options to potentially improve the output quality
+        scale: 1, // Adjust the scale to manage quality vs performance
+        useCORS: true, // Attempt to load cross-origin images
+        logging: true, // Enable for debugging purposes
+        width: element.scrollWidth, // Capture the full width
+        height: element.scrollHeight, // Capture the full height
+      }).then(function (canvas) {
+        // Convert the canvas to a data URL
+        var imageURL = canvas.toDataURL('image/png');
 
-              // Append the link to the document, trigger the click, and then remove it
-              document.body.appendChild(downloadLink);
-              downloadLink.click();
-              document.body.removeChild(downloadLink);
-          }, function(error) {
-              //console.error('Error capturing the page:', error);
-          });
-        };
+        // Create a temporary link to initiate the download
+        var downloadLink = document.createElement('a');
+        downloadLink.href = imageURL;
+        downloadLink.download = imageName || imageURL;
+
+        // Append the link to the document, trigger the click, and then remove it
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+      }, function (error) {
+        //log('Error capturing the page:', error);
+      });
+    };
 
     // ATT CUSTOM CODE END
 
