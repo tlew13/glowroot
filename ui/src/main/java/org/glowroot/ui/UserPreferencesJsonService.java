@@ -64,7 +64,7 @@ public class UserPreferencesJsonService {
             this.accessToken = getAccessToken();
         }
         String url = "http://localhost:3000/api/external/favorites";
-        String userId = "jv755d";
+        String userId = "ay434a";
         String body = "{"
                 + "\"agentId\":\"" + request.agentId() + "\","
                 + "\"cardType\":\"" + request.cardType() + "\","

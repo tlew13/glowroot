@@ -59,3 +59,27 @@ glowroot.factory('addFavoriteService', ['$http', 'popupService', function($http,
    };
    return service;
 }]);
+
+glowroot.factory('addScreenshotService', ['$http', 'popupService', function($http, popupService) {
+   var service = {
+      postData: function(agentId, cardType) {
+         if (agentId === null){
+            popupService.showDialog('Error saving screenshot. Please try again later.');
+         }
+         // Include notebook?
+         var data = {
+           agentId: agentId,
+           cardType: cardType
+         };
+         // Different API call
+         $http.post('backend/admin/user-preferences/addFavorite', data)
+           .then(function(response) {
+             popupService.showDialog(response.data);
+           },
+           function(response) {
+             popupService.showDialog('Error saving screenshot. Please try again later. ' + response.statusText);
+           });
+      }
+   };
+   return service;
+}]);

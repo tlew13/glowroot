@@ -25,7 +25,8 @@ glowroot.controller('TransactionAverageCtrl', [
   'charts',
   'html2canvas',
   'addFavoriteService',
-  function ($scope, $location, charts, html2canvas, addFavoriteService) {
+  'addScreenshotService',
+  function ($scope, $location, charts, html2canvas, addFavoriteService, addScreenshotService) {
 
     $scope.$parent.activeTabItem = 'time';
 
@@ -72,6 +73,7 @@ glowroot.controller('TransactionAverageCtrl', [
     $scope.addScreenshot = function (imageName) {
       // Use document.body as the element to capture the entire page
       var element = document.body;
+      //var notebookName = 'hardcoded_notebook_name1';
       html2canvas.capture(element, {
         // Options to potentially improve the output quality
         scale: 1, // Adjust the scale to manage quality vs performance
@@ -95,6 +97,9 @@ glowroot.controller('TransactionAverageCtrl', [
       }, function (error) {
         //log('Error capturing the page:', error);
       });
+
+      // sends post request to the API
+      //addScreenshotService.
     };
 
     $scope.addFavorite = function () {
