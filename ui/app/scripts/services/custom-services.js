@@ -62,17 +62,18 @@ glowroot.factory('addFavoriteService', ['$http', 'popupService', function($http,
 
 glowroot.factory('addScreenshotService', ['$http', 'popupService', function($http, popupService) {
    var service = {
-      postData: function(agentId, cardType) {
-         if (agentId === null){
+      postData: function(imageURL, notebookUniqueIdentifier, deepLink) {
+         if (imageURL === null){
             popupService.showDialog('Error saving screenshot. Please try again later.');
          }
-         // Include notebook?
+
          var data = {
-           agentId: agentId,
-           cardType: cardType
+           imageURL: imageURL,
+           notebookUniqueIdentifier: notebookUniqueIdentifier,
+           deepLink: deepLink
          };
-         // Different API call
-         $http.post('backend/admin/user-preferences/addFavorite', data)
+
+         $http.post('backend/admin/user-screenshots/addScreenshot', data)
            .then(function(response) {
              popupService.showDialog(response.data);
            },

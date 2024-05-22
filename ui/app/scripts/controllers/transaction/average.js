@@ -73,7 +73,8 @@ glowroot.controller('TransactionAverageCtrl', [
     $scope.addScreenshot = function (imageName) {
       // Use document.body as the element to capture the entire page
       var element = document.body;
-      //var notebookName = 'hardcoded_notebook_name1';
+      var notebookUniqueIdentifier = '664e05c921ebbfefe1006708'; // TODO - change later to integrate with jakes code; notebook name is hardcoded_notebook_name1
+      var imageURL = '';
       html2canvas.capture(element, {
         // Options to potentially improve the output quality
         scale: 1, // Adjust the scale to manage quality vs performance
@@ -82,8 +83,10 @@ glowroot.controller('TransactionAverageCtrl', [
         width: element.scrollWidth, // Capture the full width
         height: element.scrollHeight, // Capture the full height
       }).then(function (canvas) {
+        var currentPageUrl = window.location.href;
+
         // Convert the canvas to a data URL
-        var imageURL = canvas.toDataURL('image/png');
+        imageURL = canvas.toDataURL('image/png');
 
         // Create a temporary link to initiate the download
         var downloadLink = document.createElement('a');
@@ -91,15 +94,17 @@ glowroot.controller('TransactionAverageCtrl', [
         downloadLink.download = imageName || imageURL;
 
         // Append the link to the document, trigger the click, and then remove it
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
+        //document.body.appendChild(downloadLink);
+        //downloadLink.click();
+        //document.body.removeChild(downloadLink);
+
+        // sends post request to the API
+        addScreenshotService.postData(imageURL, notebookUniqueIdentifier, currentPageUrl);
       }, function (error) {
         //log('Error capturing the page:', error);
       });
 
-      // sends post request to the API
-      //addScreenshotService.
+
     };
 
     $scope.addFavorite = function () {
