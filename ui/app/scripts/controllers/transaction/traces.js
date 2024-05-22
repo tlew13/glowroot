@@ -28,8 +28,10 @@ glowroot.controller('TracesCtrl', [
   'traceModal',
   'queryStrings',
   'traceKind',
+  'html2canvas',
   'addFavoriteService',
-  function ($scope, $location, $http, $q, locationChanges, charts, httpErrors, traceModal, queryStrings, traceKind, addFavoriteService) {
+  'addScreenshotService',
+  function ($scope, $location, $http, $q, locationChanges, charts, httpErrors, traceModal, queryStrings, traceKind, html2canvas, addFavoriteService, addScreenshotService) {
 
     $scope.$parent.activeTabItem = 'traces';
 
@@ -475,6 +477,24 @@ glowroot.controller('TracesCtrl', [
     });
 
     // ATT CUSTOM CODE BEGIN
+
+    $scope.addScreenshot = function () { // TODO - use notebook id as parameter later?
+      var notebookUniqueIdentifier = '664e05c921ebbfefe1006708'; // TODO - this is hardcoded. change later to integrate with jakes code; notebook name is hardcoded_notebook_name1
+      var element = document.body;
+      html2canvas.capture(element, {
+        // Options to potentially improve the output quality
+        scale: 1,
+        useCORS: true, 
+        logging: true, 
+        width: element.scrollWidth, 
+        height: element.scrollHeight, 
+      }).then(function (canvas) {
+        var currentPageUrl = window.location.href;
+        var imageURL = canvas.toDataURL('image/png');
+        addScreenshotService.postData(imageURL, notebookUniqueIdentifier, currentPageUrl);
+      });
+    };
+
     $scope.addFavorite = function () {
       var favoriteItem = null;
       if ($scope.agentId){

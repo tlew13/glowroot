@@ -108,7 +108,6 @@ glowroot.controller('TransactionAverageCtrl', [
           addFavoriteService.postData(null, 'Service');
       }
     };
-    
     // ATT CUSTOM CODE END
 
     function onRefreshData(data) {
