@@ -1,25 +1,12 @@
 /* global glowroot*/
-glowroot.factory('html2canvas', ['$window', '$q', function($window, $q) {
-    // Check if html2canvas is loaded
+glowroot.factory('html2canvas', ['$window', function($window) {
     if (typeof html2canvas === 'undefined') {
         throw new Error('html2canvas is not loaded');
     }
-
-    // Function to capture the element
-    function capture(element, options) {
-        // Use $q to create a promise around html2canvas functionality
-        var deferred = $q.defer();
-        $window.html2canvas(element, options).then(function(canvas) {
-            deferred.resolve(canvas);
-        }, function(error) {
-            deferred.reject(error);
-        });
-        return deferred.promise;
-    }
-
-    // Return the capture function
     return {
-        capture: capture
+        capture: function(element, options) {
+            return $window.html2canvas(element, options);
+        }
     };
 }]);
 
@@ -66,13 +53,11 @@ glowroot.factory('addScreenshotService', ['$http', 'popupService', function($htt
          if (imageURL === null){
             popupService.showDialog('Error saving screenshot. Please try again later.');
          }
-
          var data = {
            imageURL: imageURL,
            notebookUniqueIdentifier: notebookUniqueIdentifier,
            deepLink: deepLink
          };
-
          $http.post('backend/admin/user-screenshots/addScreenshot', data)
            .then(function(response) {
              popupService.showDialog(response.data);

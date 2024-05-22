@@ -55,7 +55,7 @@ public class ScreenshotJsonService {
         if (this.accessTokenExpires < System.currentTimeMillis()){
             this.accessToken = getAccessToken();
         }
-        String url = "http://localhost:3000/api/external/screenshots";
+        String url = "http://localhost:3000/api/external/notebooks/screenshots";
         return this.httpClient.getWithAuthorizationHeader(url, "Bearer " + accessToken);
     }
 

@@ -70,41 +70,21 @@ glowroot.controller('TransactionAverageCtrl', [
 
     // ATT CUSTOM CODE BEGIN
 
-    $scope.addScreenshot = function (imageName) {
-      // Use document.body as the element to capture the entire page
+    $scope.addScreenshot = function () { // TODO - use notebook id as parameter later?
+      var notebookUniqueIdentifier = '664e05c921ebbfefe1006708'; // TODO - this is hardcoded. change later to integrate with jakes code; notebook name is hardcoded_notebook_name1
       var element = document.body;
-      var notebookUniqueIdentifier = '664e05c921ebbfefe1006708'; // TODO - change later to integrate with jakes code; notebook name is hardcoded_notebook_name1
-      var imageURL = '';
       html2canvas.capture(element, {
         // Options to potentially improve the output quality
-        scale: 1, // Adjust the scale to manage quality vs performance
-        useCORS: true, // Attempt to load cross-origin images
-        logging: true, // Enable for debugging purposes
-        width: element.scrollWidth, // Capture the full width
-        height: element.scrollHeight, // Capture the full height
+        scale: 1,
+        useCORS: true, 
+        logging: true, 
+        width: element.scrollWidth, 
+        height: element.scrollHeight, 
       }).then(function (canvas) {
         var currentPageUrl = window.location.href;
-
-        // Convert the canvas to a data URL
-        imageURL = canvas.toDataURL('image/png');
-
-        // Create a temporary link to initiate the download
-        var downloadLink = document.createElement('a');
-        downloadLink.href = imageURL;
-        downloadLink.download = imageName || imageURL;
-
-        // Append the link to the document, trigger the click, and then remove it
-        //document.body.appendChild(downloadLink);
-        //downloadLink.click();
-        //document.body.removeChild(downloadLink);
-
-        // sends post request to the API
+        var imageURL = canvas.toDataURL('image/png');
         addScreenshotService.postData(imageURL, notebookUniqueIdentifier, currentPageUrl);
-      }, function (error) {
-        //log('Error capturing the page:', error);
       });
-
-
     };
 
     $scope.addFavorite = function () {
@@ -128,6 +108,7 @@ glowroot.controller('TransactionAverageCtrl', [
           addFavoriteService.postData(null, 'Service');
       }
     };
+    
     // ATT CUSTOM CODE END
 
     function onRefreshData(data) {
