@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.protobuf.ProtocolStringList;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -428,11 +429,49 @@ class CollectorServiceImpl extends CollectorServiceGrpc.CollectorServiceImplBase
         responseObserver.onCompleted();
     }
 
+    private String buildStackTrace(Profile profile){
+        StringBuilder stackTrace = new StringBuilder();
+        List <Profile.ProfileNode> nodeList = profile.getNodeList();
+        ProtocolStringList packageNameList = profile.getPackageNameList();
+        ProtocolStringList classNameList = profile.getClassNameList();
+        ProtocolStringList methodNameList = profile.getMethodNameList();
+        ProtocolStringList fileNameList = profile.getFileNameList();
+
+        for (Profile.ProfileNode node : nodeList){
+            int packageNameIndex = node.getPackageNameIndex();
+            int classNameIndex = node.getClassNameIndex();
+            int methodNameIndex = node.getMethodNameIndex();
+            int fileNameIndex = node.getFileNameIndex();
+            int lineNumber = node.getLineNumber();
+            String packageName = packageNameList.get(packageNameIndex);
+            String className = classNameList.get(classNameIndex);
+            String methodName = methodNameList.get(methodNameIndex);
+            String fileName = fileNameList.get(fileNameIndex);
+            String fullClassName = "";
+            if (packageName.isEmpty()) {
+                fullClassName = className;
+            } else {
+                fullClassName = packageName + '.' + className;
+            }
+            stackTrace.append(new StackTraceElement(fullClassName, methodName,
+                    fileName, lineNumber).toString()).append(System.lineSeparator());
+        }
+        return stackTrace.toString();
+    }
+
     private void collectTraceUnderThrottle(String agentId, boolean postV09, Trace trace,
             StreamObserver<EmptyMessage> responseObserver) {
         String postV09AgentId;
         try {
             postV09AgentId = grpcCommon.getAgentId(agentId, postV09);
+            Profile mainThreadProfile = trace.getMainThreadProfile();
+            if (mainThreadProfile.getNodeCount() > 0){
+                System.out.println(buildStackTrace(mainThreadProfile));
+            }
+            Profile auxThreadProfile = trace.getAuxThreadProfile();
+            if (auxThreadProfile.getNodeCount() > 0){
+                System.out.println(buildStackTrace(auxThreadProfile));
+            }
         } catch (Throwable t) {
             logger.error("{} - {}", getAgentIdForLogging(agentId, postV09), t.getMessage(), t);
             responseObserver.onError(t);
