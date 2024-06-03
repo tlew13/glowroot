@@ -459,18 +459,25 @@ class CollectorServiceImpl extends CollectorServiceGrpc.CollectorServiceImplBase
         return stackTrace.toString();
     }
 
+    private long getProfileSampleCount(Profile profile){
+        return profile.getNodeList().get(0).getSampleCount();
+    }
+
     private void collectTraceUnderThrottle(String agentId, boolean postV09, Trace trace,
             StreamObserver<EmptyMessage> responseObserver) {
         String postV09AgentId;
         try {
             postV09AgentId = grpcCommon.getAgentId(agentId, postV09);
+            long timestamp = trace.getHeader().getStartTime();
             Profile mainThreadProfile = trace.getMainThreadProfile();
             if (mainThreadProfile.getNodeCount() > 0){
                 System.out.println(buildStackTrace(mainThreadProfile));
+                long mainThreadProfileCount = getProfileSampleCount(mainThreadProfile);
             }
             Profile auxThreadProfile = trace.getAuxThreadProfile();
             if (auxThreadProfile.getNodeCount() > 0){
                 System.out.println(buildStackTrace(auxThreadProfile));
+                long auxThreadProfileCount = getProfileSampleCount(auxThreadProfile);
             }
         } catch (Throwable t) {
             logger.error("{} - {}", getAgentIdForLogging(agentId, postV09), t.getMessage(), t);
