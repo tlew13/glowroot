@@ -29,8 +29,13 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.protobuf.ProtocolStringList;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
+import org.bson.Document;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 import org.slf4j.Logger;
@@ -102,6 +107,7 @@ class CollectorServiceImpl extends CollectorServiceGrpc.CollectorServiceImplBase
 
     private volatile long currentMinute;
     private final AtomicInteger nextDelay = new AtomicInteger();
+    private final MongoCollection<Document> threadProfileCollection;
 
     private final LoadingCache<String, Semaphore> throttlePerAgentId = CacheBuilder.newBuilder()
             .weakValues()
@@ -130,6 +136,10 @@ class CollectorServiceImpl extends CollectorServiceGrpc.CollectorServiceImplBase
         this.centralAlertingService = centralAlertingService;
         this.clock = clock;
         this.version = version;
+        String uri = System.getenv("MONGO_CONNECTION_STRING");
+        MongoClient mongoClient = MongoClients.create(uri);
+        MongoDatabase database = mongoClient.getDatabase("tapiDB");
+        this.threadProfileCollection = database.getCollection("threadProfiles");
     }
 
     @Instrumentation.Transaction(transactionType = "gRPC", transactionName = "Init",
@@ -463,21 +473,35 @@ class CollectorServiceImpl extends CollectorServiceGrpc.CollectorServiceImplBase
         return profile.getNodeList().get(0).getSampleCount();
     }
 
+    private void loadThreadProfile(String agentId, long timestamp, long count, String stackTrace){
+        // Replace the placeholder with your MongoDB deployment's connection string
+            Document threadProfile = new Document();
+            threadProfile.append("agent-id", agentId);
+            threadProfile.append("timestamp", timestamp);
+            threadProfile.append("count", count);
+            threadProfile.append("stack-trace", stackTrace);
+            this.threadProfileCollection.insertOne(threadProfile);
+    }
+
     private void collectTraceUnderThrottle(String agentId, boolean postV09, Trace trace,
             StreamObserver<EmptyMessage> responseObserver) {
         String postV09AgentId;
         try {
             postV09AgentId = grpcCommon.getAgentId(agentId, postV09);
             long timestamp = trace.getHeader().getStartTime();
+            String stackTrace = "";
+            long count = 0;
             Profile mainThreadProfile = trace.getMainThreadProfile();
             if (mainThreadProfile.getNodeCount() > 0){
-                System.out.println(buildStackTrace(mainThreadProfile));
-                long mainThreadProfileCount = getProfileSampleCount(mainThreadProfile);
+                count = getProfileSampleCount(mainThreadProfile);
+                stackTrace = buildStackTrace(mainThreadProfile);
+                loadThreadProfile(agentId, timestamp, count, stackTrace);
             }
             Profile auxThreadProfile = trace.getAuxThreadProfile();
             if (auxThreadProfile.getNodeCount() > 0){
-                System.out.println(buildStackTrace(auxThreadProfile));
-                long auxThreadProfileCount = getProfileSampleCount(auxThreadProfile);
+                count = getProfileSampleCount(auxThreadProfile);
+                stackTrace = buildStackTrace(auxThreadProfile);
+                loadThreadProfile(agentId, timestamp, count, stackTrace);
             }
         } catch (Throwable t) {
             logger.error("{} - {}", getAgentIdForLogging(agentId, postV09), t.getMessage(), t);
