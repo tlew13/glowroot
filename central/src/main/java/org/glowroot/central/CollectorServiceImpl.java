@@ -474,9 +474,16 @@ class CollectorServiceImpl extends CollectorServiceGrpc.CollectorServiceImplBase
     }
 
     private void loadThreadProfile(String agentId, long timestamp, long count, String stackTrace){
-        // Replace the placeholder with your MongoDB deployment's connection string
             Document threadProfile = new Document();
             threadProfile.append("agent-id", agentId);
+            String appAcronym = agentId.split("-")[0];
+            String appMotsId = agentId.split("-")[1];
+            String application = appAcronym + "-" + appMotsId;
+            String service = agentId.split("::")[0];
+            String jvm = agentId.split("::")[1];
+            threadProfile.append("application", application);
+            threadProfile.append("service", service);
+            threadProfile.append("jvm", jvm);
             threadProfile.append("timestamp", timestamp);
             threadProfile.append("count", count);
             threadProfile.append("stack-trace", stackTrace);
