@@ -171,7 +171,7 @@ public class CentralModule {
 
             CentralConfiguration centralConfig = getCentralConfiguration(directories.getConfDir());
             clusterManager = ClusterManager.create(directories.getConfDir(),
-                    centralConfig.jgroupsProperties());
+                    centralConfig.jgroupsProperties(), centralConfig.redisConfigurationFile());
             session = connect(centralConfig);
 
             SchemaUpgrade schemaUpgrade = new SchemaUpgrade(session, centralConfig.cassandraGcGraceSeconds(), clock, servlet);
@@ -713,6 +713,10 @@ public class CentralModule {
                 }
             }
         }
+        String redisConfigurationFile = properties.get("glowroot.redis.configurationFile");
+        if (!Strings.isNullOrEmpty(redisConfigurationFile)) {
+            builder.redisConfigurationFile(redisConfigurationFile);
+        }
         return builder.build();
     }
 
@@ -970,6 +974,7 @@ public class CentralModule {
             // this should only happen under test
             return new File(".");
         }
+
     }
 
     // TODO report checker framework issue that occurs without this suppression
@@ -1159,6 +1164,11 @@ public class CentralModule {
         }
 
         abstract Map<String, String> jgroupsProperties();
+
+        @Value.Default
+        String redisConfigurationFile() {
+            return "";
+        }
     }
 
     private static class RateLimitedLogger {

@@ -66,7 +66,7 @@ public abstract class ClusterManager implements AutoCloseable {
         return new NonClusterManager();
     }
 
-    public static ClusterManager create(File confDir, Map<String, String> jgroupsProperties) {
+    public static ClusterManager create(File confDir, Map<String, String> jgroupsProperties, String redisConfigFileName) {
         Map<String, String> properties = Maps.newHashMap(jgroupsProperties);
         String jgroupsConfigurationFile = properties.remove("jgroups.configurationFile");
         if (jgroupsConfigurationFile != null) {
@@ -77,9 +77,14 @@ public abstract class ClusterManager implements AutoCloseable {
                         Pattern.compile(":([0-9]+)").matcher(initialNodes).replaceAll("[$1]"));
             }
             return new ClusterManagerImpl(confDir, jgroupsConfigurationFile, properties);
-        } else {
-            return new NonClusterManager();
+        } else if (redisConfigFileName != null && !redisConfigFileName.isEmpty()) {
+            File redisConfigurationFile = new File(confDir, redisConfigFileName);
+            if (redisConfigurationFile.exists()) {
+                return new RedisClusterManagerImpl(redisConfigurationFile);
+            }
         }
+        return new NonClusterManager();
+
     }
 
     public abstract <K extends /*@NonNull*/ Serializable, V extends /*@NonNull*/ Object> Cache<K, V> createPerAgentCache(
@@ -487,12 +492,12 @@ public abstract class ClusterManager implements AutoCloseable {
         }
     }
 
-    private static class NonClusterDistributedExecutionMapImpl<K extends /*@NonNull*/ Serializable, V extends /*@NonNull*/ Object>
+    static class NonClusterDistributedExecutionMapImpl<K extends /*@NonNull*/ Serializable, V extends /*@NonNull*/ Object>
             implements DistributedExecutionMap<K, V> {
 
         private final ConcurrentMap<K, V> cache = new ConcurrentHashMap<>();
 
-        private NonClusterDistributedExecutionMapImpl() {}
+        public NonClusterDistributedExecutionMapImpl() {}
 
         @Override
         public @Nullable V get(K key) {

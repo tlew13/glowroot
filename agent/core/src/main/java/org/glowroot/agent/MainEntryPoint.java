@@ -316,26 +316,26 @@ public class MainEntryPoint {
             return glowrootAgentInitFactory.newGlowrootAgentInit(directories.getDataDir(), false,
                     customCollectorClass);
         }
-        if (collectorAddress.startsWith("https://") && instrumentation != null) {
-            String normalizedOsName = getNormalizedOsName();
-            if (normalizedOsName == null) {
-                throw new IllegalStateException("HTTPS connection to central collector is only"
-                        + " supported on linux, windows and osx, detected os.name: "
-                        + System.getProperty("os.name"));
-            }
-            File centralCollectorHttpsJarFile =
-                    directories.getCentralCollectorHttpsJarFile(normalizedOsName);
-            if (centralCollectorHttpsJarFile == null) {
-                throw new IllegalStateException("Missing lib/glowroot-central-collector-https-"
-                        + normalizedOsName + ".jar");
-            }
-            instrumentation
-                    .appendToBootstrapClassLoaderSearch(new JarFile(centralCollectorHttpsJarFile));
-            // also need to add to system class loader, otherwise native libraries under
-            // META-INF/native are not found
-            instrumentation
-                    .appendToSystemClassLoaderSearch(new JarFile(centralCollectorHttpsJarFile));
-        }
+//        if (collectorAddress.startsWith("https://") && instrumentation != null) {
+//            String normalizedOsName = getNormalizedOsName();
+//            if (normalizedOsName == null) {
+//                throw new IllegalStateException("HTTPS connection to central collector is only"
+//                        + " supported on linux, windows and osx, detected os.name: "
+//                        + System.getProperty("os.name"));
+//            }
+//            File centralCollectorHttpsJarFile =
+//                    directories.getCentralCollectorHttpsJarFile(normalizedOsName);
+//            if (centralCollectorHttpsJarFile == null) {
+//                throw new IllegalStateException("Missing lib/glowroot-central-collector-https-"
+//                        + normalizedOsName + ".jar");
+//            }
+//            instrumentation
+//                    .appendToBootstrapClassLoaderSearch(new JarFile(centralCollectorHttpsJarFile));
+//            // also need to add to system class loader, otherwise native libraries under
+//            // META-INF/native are not found
+//            instrumentation
+//                    .appendToSystemClassLoaderSearch(new JarFile(centralCollectorHttpsJarFile));
+//        }
         String collectorAuthority = properties.get("glowroot.collector.authority");
         return new NonEmbeddedGlowrootAgentInit(collectorAddress, collectorAuthority,
                 customCollectorClass);
