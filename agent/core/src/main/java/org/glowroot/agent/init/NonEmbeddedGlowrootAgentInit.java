@@ -127,7 +127,21 @@ public class NonEmbeddedGlowrootAgentInit implements GlowrootAgentInit {
                     }
                 }
                 if (customCollectorClass != null && collectorProxyConstructor == null) {
-                    collector = customCollectorClass.newInstance();
+                    Constructor<? extends Collector> collectorConstructorWithAgentModule = null;
+                    try {
+                        collectorConstructorWithAgentModule =
+                                customCollectorClass.getConstructor(AgentModule.class);
+                    } catch (NoSuchMethodException e) {
+                        logger.debug(e.getMessage(), e);
+                    }
+
+                    if (collectorConstructorWithAgentModule == null) {
+                        collector = customCollectorClass.newInstance();
+                    } else {
+                        collector = collectorConstructorWithAgentModule.newInstance(agentModule);
+                        startupLogger.info("using collector with agent module: {}",
+                                collectorConstructorWithAgentModule.getName());
+                    }
                 } else {
                     centralCollector = new CentralCollector(properties,
                             checkNotNull(collectorAddress), collectorAuthority, confDirs,
