@@ -15,8 +15,12 @@
  */
 package org.glowroot.central.repo;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import com.datastax.oss.driver.api.core.ConsistencyLevel;
 import com.datastax.oss.driver.api.core.cql.*;
@@ -33,6 +37,7 @@ import org.glowroot.common2.config.ImmutableRoleConfig;
 import org.glowroot.common2.config.RoleConfig;
 import org.glowroot.common2.repo.ConfigRepository.DuplicateRoleNameException;
 
+import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 class RoleDao {
@@ -50,6 +55,8 @@ class RoleDao {
 
     private final Cache<String, Optional<RoleConfig>> roleConfigCache;
     private final Cache<String, List<RoleConfig>> allRoleConfigsCache;
+
+    private static IAccessRole accessRole;
 
     RoleDao(Session session, ClusterManager clusterManager) throws Exception {
         this.session = session;
@@ -73,11 +80,11 @@ class RoleDao {
             // role)
             int i = 0;
             BoundStatement boundStatement = insertPS.bind()
-                .setString(i++, "Administrator")
-                .setSet(i++,
-                    ImmutableSet.of("agent:*:transaction", "agent:*:error", "agent:*:jvm",
-                            "agent:*:syntheticMonitor", "agent:*:incident", "agent:*:config",
-                            "admin"), String.class);
+                    .setString(i++, "Administrator")
+                    .setSet(i++,
+                            ImmutableSet.of("agent:*:transaction", "agent:*:error", "agent:*:jvm",
+                                    "agent:*:syntheticMonitor", "agent:*:incident", "agent:*:config",
+                                    "admin"), String.class);
             session.write(boundStatement);
         }
 
@@ -85,6 +92,42 @@ class RoleDao {
                 new RoleConfigCacheLoader());
         allRoleConfigsCache = clusterManager.createSelfBoundedCache("allRoleConfigsCache",
                 new AllRolesCacheLoader());
+
+        accessRole = loadAccessRoleConfig(RoleDao.class.getClassLoader());
+    }
+
+    private IAccessRole loadAccessRoleConfig(@Nullable ClassLoader classLoader) throws Exception {
+        InputStream in;
+        if (classLoader == null) {
+            in = RoleDao.class.getResourceAsStream("META-INF/org.glowroot.central.repo.IAccessRole");
+        } else {
+            in = classLoader.getResourceAsStream("META-INF/org.glowroot.central.repo.IAccessRole");
+        }
+
+        if (in == null) {
+            return null;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, UTF_8))) {
+            String line = reader.readLine();
+            while (line != null) {
+                line = line.trim();
+                if (!line.isEmpty() && !line.startsWith("#")) {
+                    break;
+                }
+                line = reader.readLine();
+            }
+            if (line == null) {
+                return null;
+            }
+            Class<?> clazz = Class.forName(line, false, classLoader);
+            if (IAccessRole.class.isAssignableFrom(clazz)) {
+                return (IAccessRole) clazz.getConstructor(Session.class)
+                        .newInstance(session);
+            } else {
+                return null;
+            }
+        }
     }
 
     List<RoleConfig> read() throws Exception {
@@ -98,7 +141,7 @@ class RoleDao {
 
     void delete(String name) throws Exception {
         BoundStatement boundStatement = deletePS.bind()
-            .setString(0, name);
+                .setString(0, name);
         session.write(boundStatement);
         roleConfigCache.invalidate(name);
         allRoleConfigsCache.invalidate(ALL_ROLES_SINGLE_CACHE_KEY);
@@ -135,11 +178,25 @@ class RoleDao {
     private static BoundStatement bindInsert(BoundStatement boundStatement, RoleConfig userConfig) {
         int i = 0;
         return boundStatement.setString(i++, userConfig.name())
-            .setSet(i++, userConfig.permissions(), String.class);
+                .setSet(i++, userConfig.permissions(), String.class);
     }
 
     private static RoleConfig buildRole(Row row) {
         int i = 0;
+
+        if (accessRole != null ){
+            String name = checkNotNull(row.getString("name"));
+            Set<String> dbPermissions = row.getSet("permissions", String.class);
+            Set<String> permissions =  accessRole.getPermissionsForRole(name, dbPermissions);
+
+            return ImmutableRoleConfig.builder()
+                    .central(true)
+                    .name(name)
+                    .permissions(permissions)
+                    .isAccessRoleEnabled(true)
+                    .build();
+        }
+
         return ImmutableRoleConfig.builder()
                 .central(true)
                 .name(checkNotNull(row.getString(i++)))
@@ -151,7 +208,7 @@ class RoleDao {
         @Override
         public Optional<RoleConfig> load(String name) {
             BoundStatement boundStatement = readOnePS.bind()
-                .setString(0, name);
+                    .setString(0, name);
             ResultSet results = session.read(boundStatement);
             Row row = results.one();
             if (row == null) {
