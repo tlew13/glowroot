@@ -99,9 +99,9 @@ class RoleDao {
     private IAccessRole loadAccessRoleConfig(@Nullable ClassLoader classLoader) throws Exception {
         InputStream in;
         if (classLoader == null) {
-            in = RoleDao.class.getResourceAsStream("META-INF/org.glowroot.central.repo.IAccessRole");
+            in = RoleDao.class.getResourceAsStream("META-INF/services/org.glowroot.central.repo.IAccessRole");
         } else {
-            in = classLoader.getResourceAsStream("META-INF/org.glowroot.central.repo.IAccessRole");
+            in = classLoader.getResourceAsStream("META-INF/services/org.glowroot.central.repo.IAccessRole");
         }
 
         if (in == null) {
