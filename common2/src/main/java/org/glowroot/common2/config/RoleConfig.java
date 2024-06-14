@@ -35,6 +35,12 @@ public abstract class RoleConfig {
 
     @JsonIgnore
     @Value.Default
+    public boolean isAccessRoleEnabled() {
+        return false;
+    }
+
+    @JsonIgnore
+    @Value.Default
     public boolean central() {
         return false;
     }
@@ -43,6 +49,7 @@ public abstract class RoleConfig {
     @JsonIgnore
     public ImmutableSet<SimplePermission> simplePermissions() {
         Set<SimplePermission> simplePermissions = Sets.newHashSet();
+        SimplePermission.setAccessRoleEnabled(isAccessRoleEnabled());
         for (String permission : permissions()) {
             if (central()) {
                 simplePermissions.add(SimplePermission.create(permission));
@@ -107,12 +114,21 @@ public abstract class RoleConfig {
     @Value.Immutable
     public abstract static class SimplePermission {
 
+        private static boolean accessRoleEnabledFlag;
+        public static void setAccessRoleEnabled(boolean isAccessRoleEnabled) {
+            accessRoleEnabledFlag = isAccessRoleEnabled;
+        }
+        public static boolean getAccessRoleEnabled() {
+            return accessRoleEnabledFlag;
+        }
+
         public static SimplePermission create(String permission) {
             PermissionParser parser = new PermissionParser(permission);
             parser.parse();
             return ImmutableSimplePermission.builder()
                     .addAllAgentRollupIds(parser.getAgentRollupIds())
                     .addAllParts(Splitter.on(':').splitToList(parser.getPermission()))
+                    .isAccessRoleEnabled(accessRoleEnabledFlag)
                     .build();
         }
 
@@ -120,11 +136,18 @@ public abstract class RoleConfig {
             return ImmutableSimplePermission.builder()
                     .addAgentRollupIds(agentId)
                     .addAllParts(Splitter.on(':').splitToList(permission))
+                    .isAccessRoleEnabled(accessRoleEnabledFlag)
                     .build();
         }
 
         public abstract List<String> agentRollupIds();
         public abstract List<String> parts();
+
+        //az9167
+        @Value.Default
+        public boolean isAccessRoleEnabled() {
+            return false;
+        }
 
         @VisibleForTesting
         boolean implies(SimplePermission other) {
@@ -149,6 +172,12 @@ public abstract class RoleConfig {
                 if (agentRollupId.equals("*") || agentRollupIds().contains(otherAgentRollupId)) {
                     return true;
                 }
+                if (isAccessRoleEnabled()){
+                    boolean result= areAgentIdsEqual(agentRollupId, otherAgentRollupId);
+                    if (result) {
+                        return true;
+                    }
+                }
                 if (agentRollupId.endsWith("::") && otherAgentRollupId.startsWith(agentRollupId)) {
                     return true;
                 }
@@ -161,6 +190,12 @@ public abstract class RoleConfig {
             for (String agentRollupId : agentRollupIds()) {
                 if (agentRollupId.equals("*") || agentRollupIds().contains(otherAgentRollupId)) {
                     return HasAnyPermission.YES;
+                }
+                if (isAccessRoleEnabled()){
+                    boolean result = areAgentIdsEqual(agentRollupId, otherAgentRollupId);
+                    if (result) {
+                        return HasAnyPermission.YES;
+                    }
                 }
                 if (agentRollupId.endsWith("::") && otherAgentRollupId.startsWith(agentRollupId)) {
                     onlyInChild = true;
@@ -185,6 +220,20 @@ public abstract class RoleConfig {
 
         private static boolean implies(String part, String otherPart) {
             return part.equals(otherPart) || part.equals("*");
+        }
+
+        private static boolean areAgentIdsEqual(String agentRollupId, String otherAgentRollupId){
+            String baseAgentRollupId = getAppNameFromParts(agentRollupId);
+            String baseOtherAgentRollupId = getAppNameFromParts(otherAgentRollupId);
+
+            return baseAgentRollupId.equalsIgnoreCase(baseOtherAgentRollupId);
+        }
+        private static String getAppNameFromParts(String input){
+            String[] parts = input.split("-");
+            if (parts.length >= 2){
+                return parts[0] + "-" + parts[1].replace("::", "");
+            }
+            return "";
         }
     }
 }
