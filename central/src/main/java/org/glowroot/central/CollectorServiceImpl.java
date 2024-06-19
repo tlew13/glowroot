@@ -475,7 +475,8 @@ class CollectorServiceImpl extends CollectorServiceGrpc.CollectorServiceImplBase
 
     private void loadThreadProfile(String agentId, long timestamp, long endTime, long count, String stackTrace){
             Document threadProfile = new Document();
-            threadProfile.append("agent-id", agentId);
+            threadProfile.append("cluster", "local");
+            threadProfile.append("agent_id", agentId);
             String appAcronym = agentId.split("-")[0];
             String appMotsId = agentId.split("-")[1];
             String application = appAcronym + "-" + appMotsId;
@@ -484,10 +485,11 @@ class CollectorServiceImpl extends CollectorServiceGrpc.CollectorServiceImplBase
             threadProfile.append("application", application);
             threadProfile.append("service", service);
             threadProfile.append("jvm", jvm);
-            threadProfile.append("timestamp", timestamp);
+            threadProfile.append("url", "https://localhost:4000");
+            threadProfile.append("capture_time", timestamp);
             threadProfile.append("endtime", endTime);
             threadProfile.append("count", count);
-            threadProfile.append("stack-trace", stackTrace);
+            threadProfile.append("thread_profile", stackTrace);
             this.threadProfileCollection.insertOne(threadProfile);
     }
 
