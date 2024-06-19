@@ -137,8 +137,9 @@ class CollectorServiceImpl extends CollectorServiceGrpc.CollectorServiceImplBase
         this.clock = clock;
         this.version = version;
         String uri = System.getenv("MONGO_CONNECTION_STRING");
+        String db = System.getenv("MONGO_DB");
         MongoClient mongoClient = MongoClients.create(uri);
-        MongoDatabase database = mongoClient.getDatabase("tapiDB");
+        MongoDatabase database = mongoClient.getDatabase(db);
         this.threadProfileCollection = database.getCollection("threadProfiles");
     }
 
