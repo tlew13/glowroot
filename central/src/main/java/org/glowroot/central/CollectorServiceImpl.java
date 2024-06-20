@@ -486,7 +486,7 @@ class CollectorServiceImpl extends CollectorServiceGrpc.CollectorServiceImplBase
             threadProfile.append("application", application);
             threadProfile.append("service", service);
             threadProfile.append("jvm", jvm);
-            threadProfile.append("url", "https://localhost:4000");
+            threadProfile.append("url", "http://localhost:4000");
             threadProfile.append("capture_time", timestamp);
             threadProfile.append("endtime", endTime);
             threadProfile.append("count", count);
