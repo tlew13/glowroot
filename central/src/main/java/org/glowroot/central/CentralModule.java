@@ -1166,8 +1166,9 @@ public class CentralModule {
         abstract Map<String, String> jgroupsProperties();
 
         @Value.Default
+        @Nullable
         String redisConfigurationFile() {
-            return "";
+            return null;
         }
     }
 

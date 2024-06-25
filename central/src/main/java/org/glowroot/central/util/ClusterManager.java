@@ -80,7 +80,7 @@ public abstract class ClusterManager implements AutoCloseable {
         } else if (redisConfigFileName != null && !redisConfigFileName.isEmpty()) {
             File redisConfigurationFile = new File(confDir, redisConfigFileName);
             if (redisConfigurationFile.exists()) {
-                return new RedisClusterManagerImpl(redisConfigurationFile);
+                return new RedissonClusterManagerImpl(redisConfigurationFile);
             }
         }
         return new NonClusterManager();

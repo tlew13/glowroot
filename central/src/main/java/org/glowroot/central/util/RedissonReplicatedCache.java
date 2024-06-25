@@ -18,17 +18,12 @@ public class RedissonReplicatedCache<K, V> implements ConcurrentMap<K, V> {
     private static final Logger logger = LoggerFactory.getLogger(RedissonReplicatedCache.class);
     private final RedissonClient redisson;
     private final RMapCache<K, V> cache;
-    
+
     private final String cacheName;
-    private long expirationTime = -1;
+    private final long expirationTime;
 
-    private TimeUnit expirationUnit;
+    private final TimeUnit expirationUnit;
 
-    public RedissonReplicatedCache(String cacheName, RedissonClient redisson) {
-        this.redisson = redisson;
-        this.cache = redisson.getMapCache(cacheName);
-        this.cacheName = cacheName;
-    }
 
     public RedissonReplicatedCache(String cacheName, RedissonClient redisson, long expirationTime, TimeUnit expirationUnit) {
         this.redisson = redisson;
@@ -40,12 +35,8 @@ public class RedissonReplicatedCache<K, V> implements ConcurrentMap<K, V> {
 
     @Override
     public V put(K key, V value) {
-       // Set the TTL
-        if(this.expirationTime >= 0) {
-            this.cache.put(key, value, this.expirationTime, this.expirationUnit);
-        }else{
-            this.cache.put(key, value);
-        }
+        // Set the TTL
+        this.cache.put(key, value, this.expirationTime, this.expirationUnit);
         return value;
     }
 
@@ -61,11 +52,7 @@ public class RedissonReplicatedCache<K, V> implements ConcurrentMap<K, V> {
 
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
-        if(this.expirationTime >= 0) {
-            this.cache.putAll(m, this.expirationTime, this.expirationUnit);
-        }else{
-            this.cache.putAll(m);
-        }
+        this.cache.putAll(m, this.expirationTime, this.expirationUnit);
     }
 
     @Override
@@ -110,11 +97,7 @@ public class RedissonReplicatedCache<K, V> implements ConcurrentMap<K, V> {
 
     @Override
     public V putIfAbsent(K key, V value) {
-        if(this.expirationTime >= 0) {
-            return this.cache.putIfAbsent(key, value, this.expirationTime, this.expirationUnit);
-        }else{
-            return this.cache.putIfAbsent(key, value);
-        }
+        return this.cache.putIfAbsent(key, value, this.expirationTime, this.expirationUnit);
     }
 
     @Override
@@ -124,7 +107,7 @@ public class RedissonReplicatedCache<K, V> implements ConcurrentMap<K, V> {
 
     @Override
     public boolean replace(K key, V oldValue, V newValue) {
-       return this.cache.replace(key, oldValue, newValue);
+        return this.cache.replace(key, oldValue, newValue);
     }
 
     @Override

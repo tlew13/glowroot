@@ -15,15 +15,15 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
-public class RedisClusterManagerImpl extends ClusterManager {
+public class RedissonClusterManagerImpl extends ClusterManager {
 
-    private static final Logger logger = LoggerFactory.getLogger(RedisClusterManagerImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(RedissonClusterManagerImpl.class);
     private final RedissonClient redisson;
 
     private final Executor executor;
 
 
-    public RedisClusterManagerImpl(File redisConfigurationFile) {
+    public RedissonClusterManagerImpl(File redisConfigurationFile) {
 
 
         Config config = null;
@@ -75,7 +75,7 @@ public class RedisClusterManagerImpl extends ClusterManager {
     @Override
     public <K extends /*@NonNull*/ Serializable, V extends /*@NonNull*/ Serializable> ConcurrentMap<K, V> createReplicatedMap(
             String mapName) {
-        return new RedissonReplicatedCache<>(mapName, this.redisson);
+        return redisson.getMapCache(mapName);
     }
 
     @Override
@@ -83,6 +83,7 @@ public class RedisClusterManagerImpl extends ClusterManager {
             String mapName, long expirationTime, TimeUnit expirationUnit) {
         return new RedissonReplicatedCache<>(mapName, this.redisson, expirationTime, expirationUnit);
     }
+
 
     @Override
     public void close() throws InterruptedException {
