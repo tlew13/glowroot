@@ -90,8 +90,8 @@ fi
 if [ "$JGROUPS_SYM_ENCRYPT_KEY_ALIAS" ]; then
   sed -i "s/^jgroups.symEncryptKeyAlias=.*$/jgroups.symEncryptKeyAlias=$JGROUPS_SYM_ENCRYPT_KEY_ALIAS/" glowroot-central.properties
 fi
-if [ "$JGROUPS_SYM_ENCRYPT_KEY_PASSWORD" ]; then
-  sed -i "s/^jgroups.symEncryptKeyPassword=.*$/jgroups.symEncryptKeyPassword=$JGROUPS_SYM_ENCRYPT_KEY_PASSWORD/" glowroot-central.properties
+if [ "$GLOWROOT_REDIS_CONFIGURATIONFILE" ]; then
+  sed -i "s/^redis.configurationFile=.*$/redis.configurationFile=$GLOWROOT_REDIS_CONFIGURATIONFILE/" glowroot-central.properties
 fi
 
 exec "$@"
