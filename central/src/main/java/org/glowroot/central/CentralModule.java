@@ -15,10 +15,7 @@
  */
 package org.glowroot.central;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.io.Writer;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -170,8 +167,11 @@ public class CentralModule {
             }
 
             CentralConfiguration centralConfig = getCentralConfiguration(directories.getConfDir());
+
+           SPIClusterManager spiClusterManager = loadSPIClusterManager(CentralModule.class.getClassLoader());
             clusterManager = ClusterManager.create(directories.getConfDir(),
-                    centralConfig.jgroupsProperties());
+                        centralConfig.jgroupsProperties(), spiClusterManager);
+
             session = connect(centralConfig);
 
             SchemaUpgrade schemaUpgrade = new SchemaUpgrade(session, centralConfig.cassandraGcGraceSeconds(), clock, servlet);
@@ -339,6 +339,42 @@ public class CentralModule {
         this.rollupService = rollupService;
         this.syntheticMonitorService = syntheticMonitorService;
         this.uiModule = uiModule;
+    }
+
+    private SPIClusterManager loadSPIClusterManager(@Nullable ClassLoader classLoader) {
+        InputStream in;
+        if (classLoader == null) {
+            in = ClusterManager.class.getResourceAsStream("META-INF/services/org.glowroot.central.util.SPIClusterManager");
+        } else {
+            in = classLoader.getResourceAsStream("META-INF/services/org.glowroot.central.util.SPIClusterManager");
+        }
+
+        if (in == null) {
+            return null;
+        }
+
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in, UTF_8));
+            String line = reader.readLine();
+            while (line != null) {
+                line = line.trim();
+                if (!line.isEmpty() && !line.startsWith("#")) {
+                    break;
+                }
+                line = reader.readLine();
+            }
+            if (line == null) {
+                return null;
+            }
+            Class<?> clazz = Class.forName(line, false, classLoader);
+            if (SPIClusterManager.class.isAssignableFrom(clazz)) {
+                return (SPIClusterManager) clazz.getConstructor().newInstance();
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     CommonHandler getCommonHandler() {

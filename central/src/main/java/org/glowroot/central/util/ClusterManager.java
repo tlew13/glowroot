@@ -66,7 +66,7 @@ public abstract class ClusterManager implements AutoCloseable {
         return new NonClusterManager();
     }
 
-    public static ClusterManager create(File confDir, Map<String, String> jgroupsProperties) {
+    public static ClusterManager create(File confDir, Map<String, String> jgroupsProperties, SPIClusterManager spiClusterManager) {
         Map<String, String> properties = Maps.newHashMap(jgroupsProperties);
         String jgroupsConfigurationFile = properties.remove("jgroups.configurationFile");
         if (jgroupsConfigurationFile != null) {
@@ -77,9 +77,16 @@ public abstract class ClusterManager implements AutoCloseable {
                         Pattern.compile(":([0-9]+)").matcher(initialNodes).replaceAll("[$1]"));
             }
             return new ClusterManagerImpl(confDir, jgroupsConfigurationFile, properties);
-        } else {
-            return new NonClusterManager();
+        }else if(spiClusterManager != null){
+            try {
+                spiClusterManager.setup(confDir);
+                return spiClusterManager.create();
+            }catch (Exception e){
+                logger.warn("Failed to create SPIClusterManager, defaulting to NonClusterManager: " + e.getMessage());
+            }
         }
+        return new NonClusterManager();
+
     }
 
     public abstract <K extends /*@NonNull*/ Serializable, V extends /*@NonNull*/ Object> Cache<K, V> createPerAgentCache(
