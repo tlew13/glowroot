@@ -474,7 +474,7 @@ class CollectorServiceImpl extends CollectorServiceGrpc.CollectorServiceImplBase
         return profile.getNodeList().get(0).getSampleCount();
     }
 
-    private void loadThreadProfile(String agentId, long timestamp, long endTime, long count, String stackTrace){
+    private void loadThreadProfile(String agentId, long timestamp, long endTime, long count, String stackTrace, String transactionType){
             Document threadProfile = new Document();
             threadProfile.append("cluster", "local");
             threadProfile.append("agent_id", agentId);
@@ -490,6 +490,7 @@ class CollectorServiceImpl extends CollectorServiceGrpc.CollectorServiceImplBase
             threadProfile.append("capture_time", timestamp);
             threadProfile.append("endtime", endTime);
             threadProfile.append("count", count);
+            threadProfile.append("transaction_type", transactionType);
             threadProfile.append("thread_profile", stackTrace);
             this.threadProfileCollection.insertOne(threadProfile);
     }
@@ -502,19 +503,20 @@ class CollectorServiceImpl extends CollectorServiceGrpc.CollectorServiceImplBase
             long timestamp = trace.getHeader().getStartTime();
             long duration = trace.getHeader().getDurationNanos();
             long endTime = (duration/1000000) + timestamp;
+            String transactionType = trace.getHeader().getTransactionType();
             String stackTrace = "";
             long count = 0;
             Profile mainThreadProfile = trace.getMainThreadProfile();
             if (mainThreadProfile.getNodeCount() > 0){
                 count = getProfileSampleCount(mainThreadProfile);
                 stackTrace = buildStackTrace(mainThreadProfile);
-                loadThreadProfile(agentId, timestamp, endTime, count, stackTrace);
+                loadThreadProfile(agentId, timestamp, endTime, count, stackTrace, transactionType);
             }
             Profile auxThreadProfile = trace.getAuxThreadProfile();
             if (auxThreadProfile.getNodeCount() > 0){
                 count = getProfileSampleCount(auxThreadProfile);
                 stackTrace = buildStackTrace(auxThreadProfile);
-                loadThreadProfile(agentId, timestamp, endTime, count, stackTrace);
+                loadThreadProfile(agentId, timestamp, endTime, count, stackTrace, transactionType);
             }
         } catch (Throwable t) {
             logger.error("{} - {}", getAgentIdForLogging(agentId, postV09), t.getMessage(), t);
