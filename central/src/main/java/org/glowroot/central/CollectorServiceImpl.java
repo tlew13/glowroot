@@ -493,12 +493,16 @@ class CollectorServiceImpl extends CollectorServiceGrpc.CollectorServiceImplBase
             String application = appAcronym + "-" + appMotsId;
             String service = agentId.split("::")[0];
             String jvm = agentId.split("::")[1];
+            int startIndex = application.length() + 1; // +1 for the hyphen
+            String serviceName = service.substring(startIndex);
+            Date captureDate = new Date(timestamp);
+            Date endDate = new Date(endTime);
             threadProfile.append("application", application);
-            threadProfile.append("service", service);
+            threadProfile.append("service", serviceName);
             threadProfile.append("jvm", jvm);
             threadProfile.append("url", "http://localhost:4000");
-            threadProfile.append("capture_time", timestamp);
-            threadProfile.append("endtime", endTime);
+            threadProfile.append("capture_time", captureDate);
+            threadProfile.append("endtime", endDate);
             threadProfile.append("count", count);
             threadProfile.append("transaction_type", transactionType);
             if (main) {
